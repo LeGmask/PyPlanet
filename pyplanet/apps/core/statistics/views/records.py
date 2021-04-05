@@ -35,18 +35,14 @@ class TopSumsView(ManualListView):
 		self.topsums = topsums
 
 	async def get_data(self):
-		data = list()
-		for idx, (player, (first, second, third)) in enumerate(self.topsums):
-			data.append(dict(
+		return [dict(
 				place=idx+1,
 				player_nickname=player.nickname,
 				first=first,
 				second=second,
 				third=third,
 				total=first + second + third,
-			))
-
-		return data
+			) for idx, (player, (first, second, third)) in enumerate(self.topsums)]
 
 	async def destroy(self):
 		self.topsums = None

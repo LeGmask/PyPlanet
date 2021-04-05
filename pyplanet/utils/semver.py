@@ -126,11 +126,9 @@ def parse_version_info(version):
 	:rtype: :class:`VersionInfo`
 	"""
 	parts = parse(version)
-	version_info = VersionInfo(
+	return VersionInfo(
 		parts['major'], parts['minor'], parts['patch'],
 		parts['prerelease'], parts['build'])
-
-	return version_info
 
 
 def _nat_cmp(a, b):
@@ -244,7 +242,7 @@ def max_ver(ver1, ver2):
 	:rtype: :class:`VersionInfo`
 	"""
 	cmp_res = compare(ver1, ver2)
-	if cmp_res == 0 or cmp_res == 1:
+	if cmp_res in [0, 1]:
 		return ver1
 	else:
 		return ver2
@@ -259,7 +257,7 @@ def min_ver(ver1, ver2):
 	:rtype: :class:`VersionInfo`
 	"""
 	cmp_res = compare(ver1, ver2)
-	if cmp_res == 0 or cmp_res == -1:
+	if cmp_res in [0, -1]:
 		return ver1
 	else:
 		return ver2

@@ -37,8 +37,8 @@ class CommandParser(ArgumentParser):
 
 	def parse_args(self, args=None, namespace=None):
 		# Catch missing argument for a better error message
-		if (hasattr(self.cmd, 'missing_args_message') and
-				not (args or any(not arg.startswith('-') for arg in args))):
+		if (hasattr(self.cmd, 'missing_args_message') and not args
+		    and all(arg.startswith('-') for arg in args)):
 			self.error(self.cmd.missing_args_message)
 		return super().parse_args(args, namespace)
 

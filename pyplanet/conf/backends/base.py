@@ -15,9 +15,8 @@ class ConfigBackend:
 
 	def __init__(self, **options):
 		self.options = options
-		self.defaults = dict()
-		self.settings = dict()
-		self.settings['SETTINGS_METHOD'] = self.name
+		self.defaults = {}
+		self.settings = {'SETTINGS_METHOD': self.name}
 
 	def load(self):
 		"""

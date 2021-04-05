@@ -38,7 +38,7 @@ class Dedimania(AppConfig):
 		self.lock = asyncio.Lock()
 		self.current_records = []
 		self.current_script = None
-		self.player_info = dict()
+		self.player_info = {}
 
 		self.v_replay = None
 		self.v_replay_checks = None
@@ -232,7 +232,7 @@ class Dedimania(AppConfig):
 			self.v_replay = None
 			self.v_replay_checks = None
 			self.ghost_replay = None
-			self.current_records = list()
+			self.current_records = []
 		if self.ready:
 			await self.widget.display()
 
@@ -276,7 +276,7 @@ class Dedimania(AppConfig):
 						if replay:
 							self.v_replay = replay
 					if not self.v_replay_checks and self.current_script.lower().startswith('laps'):
-						self.v_replay_checks = ','.join([str(c) for c in record.race_cps])
+						self.v_replay_checks = ','.join(str(c) for c in record.race_cps)
 
 					if pos == 0:
 						replay = await self.get_ghost_replay(record.login)
@@ -385,13 +385,13 @@ class Dedimania(AppConfig):
 				handle_exception(e, module_name=__name__, func_name='refresh_records')
 			logger.error('Dedimania gave an Fault: {}'.format(str(e)))
 
-			self.current_records = list()
+			self.current_records = []
 			return
 		except Exception as e:
 			self.ready = False
 			handle_exception(e, module_name=__name__, func_name='refresh_records')
 			logger.exception(e)
-			self.current_records = list()
+			self.current_records = []
 			return
 
 		for info in player_infos:
@@ -449,7 +449,7 @@ class Dedimania(AppConfig):
 		chat_announce = await self.setting_chat_announce.get_value()
 		current_records = [x for x in self.current_records if x.login == player.login]
 		score = lap_time
-		if len(current_records) > 0:
+		if current_records:
 			current_record = current_records[0]
 			previous_index = self.current_records.index(current_record) + 1
 
@@ -586,9 +586,7 @@ class Dedimania(AppConfig):
 			message = '$0b3Current Dedimania Record: $fff\uf017 {}$z$s$0b3 by $fff{}$z$s$0b3 ($l[http://dedimania.net/tm2stats/?do=stat&UId={}&Show=RECORDS]$fff{}$0b3 records$l)'.format(
 				times.format_time(first_record.score), first_record.nickname, self.instance.map_manager.current_map.uid, records_amount
 			)
-			calls = list()
-			calls.append(self.instance.chat(message))
-
+			calls = [self.instance.chat(message)]
 			for player in self.instance.player_manager.online:
 				calls.append(await self.chat_personal_record(player))
 			return await asyncio.gather(*calls)
@@ -600,14 +598,14 @@ class Dedimania(AppConfig):
 		async with self.lock:
 			record = [x for x in self.current_records if x.login == player.login]
 
-		if len(record) > 0:
+		if record:
 			message = '$0b3You currently hold the $fff{}.$0b3 Dedimania Record: $fff\uf017 {}'.format(
 				self.current_records.index(record[0]) + 1, times.format_time(record[0].score)
 			)
-			return self.instance.chat(message, player)
 		else:
 			message = '$0b3You don\'t have a Dedimania Record on this map yet.'
-			return self.instance.chat(message, player)
+
+		return self.instance.chat(message, player)
 
 	async def command_dedicps(self, player, data, *args, **kwargs):
 		"""

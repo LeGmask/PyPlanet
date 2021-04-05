@@ -41,11 +41,11 @@ class Registry:
 
 		# Cache app contexts
 		self.app_configs = dict()
-		self.app_models = dict()
-		self.app_migrations = dict()
+		self.app_models = {}
+		self.app_migrations = {}
 
 		# Models are saved as [app_label.model_classname] = (app, name, model)
-		self.models = dict()
+		self.models = {}
 
 	def init_app(self, app):
 		"""
@@ -61,12 +61,11 @@ class Registry:
 		migrations_path = os.path.join(root_path, 'migrations')
 
 		# Set paths in the config context.
-		if os.path.exists(models_path):
-			if not os.path.exists(migrations_path):
-				try:
-					os.mkdir(migrations_path)
-				except:
-					pass
+		if os.path.exists(models_path) and not os.path.exists(migrations_path):
+			try:
+				os.mkdir(migrations_path)
+			except:
+				pass
 
 		# Import the model module.
 		self.app_models[app.label] = models = list(get_app_models(app))

@@ -39,7 +39,7 @@ class StatsDashboardView(StatsView):
 		return context
 
 	async def get_all_player_data(self, logins):
-		data = dict()
+		data = {}
 		for login in logins:
 			player = await self.app.instance.player_manager.get_player(login=login, lock=False)
 			data[login] = await self.app.processor.get_dashboard_data(player)

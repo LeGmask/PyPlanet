@@ -118,15 +118,13 @@ class LocalRecordsWidget(TimesWidgetView):
 			current_records = self.app.current_records
 
 		if self.app.instance.performance_mode:
-			list_records = list()
+			list_records = []
 			records = list(current_records[:self.record_amount])
 
 			index = 1
 			for record in records:
 				record_player = await record.get_related('player')
-				list_record = dict()
-				list_record['index'] = index
-				list_record['color'] = '$fff'
+				list_record = {'index': index, 'color': '$fff'}
 				if index <= self.top_entries:
 					list_record['color'] = '$ff0'
 				list_record['nickname'] = record_player.nickname
@@ -200,9 +198,8 @@ class LocalRecordsListView(ManualListView):
 		else:
 			records = self.app.current_records
 
-		index = 1
 		items = []
-		for item in records:
+		for index, item in enumerate(records, start=1):
 			record_player = item.player
 			record_time_difference = ''
 			if index > 1:
@@ -213,8 +210,6 @@ class LocalRecordsListView(ManualListView):
 				'record_time': times.format_time(item.score),
 				'record_time_difference': record_time_difference
 			})
-			index += 1
-
 		return items
 
 	async def get_actions(self):
@@ -351,13 +346,9 @@ class LocalRecordCpCompareListView(ManualListView):
 			if self.own_record else [0 for _ in compare_cps]
 		total_cps = len(own_cps)
 
-		data = list()
-		for cp, (own, compare) in enumerate(zip(own_cps, compare_cps)):
-			data.append(dict(
+		return [dict(
 				cp='Finish' if (cp + 1) == total_cps else cp + 1,
 				own_time=format_time(own) if own else '',
 				compare_time=format_time(compare),
 				difference=self.get_diff_text(own, compare) if self.own_record else '-'
-			))
-
-		return data
+			) for cp, (own, compare) in enumerate(zip(own_cps, compare_cps))]

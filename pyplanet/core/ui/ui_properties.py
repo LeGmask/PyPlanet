@@ -40,7 +40,7 @@ class UIProperties:  # pragma: no cover
 		self._instance = instance
 		self._raw = None
 		self._properties = dict()
-		self._update_properties = dict()
+		self._update_properties = {}
 
 	@property
 	def properties(self):
@@ -75,23 +75,23 @@ class UIProperties:  # pragma: no cover
 			logger.warning('Unable to reset UIProperties: {}'.format(str(e)))
 
 	async def refresh_properties(self):
-		if self._instance.game.game == 'tm':
-			method = 'Trackmania.UI.GetProperties'
-		elif self._instance.game.game == 'sm':
+		if self._instance.game.game == 'sm':
 			method = 'Shootmania.UI.GetProperties'
+		elif self._instance.game.game == 'tm':
+			method = 'Trackmania.UI.GetProperties'
 		else:
 			method = 'Common.UIModules.GetProperties'
 		try:
-			if self._instance.game.game == 'tm' or self._instance.game.game == 'sm':
+			if self._instance.game.game in ['tm', 'sm']:
 				self._raw = await self._instance.gbx(method, timeout=2)
 				self._properties = xd.parse(self._raw['raw_1'])
 			else:
 				self._raw = await self._instance.gbx(method, timeout=2)
-				self._properties = dict()
+				self._properties = {}
 				for entry in self._raw['uimodules']:
 					self._properties[entry['id']] = entry
 		except Exception as e:
-			self._properties = dict()
+			self._properties = {}
 			self._raw = None
 
 	def set_visibility(self, element: str, visible: bool):
@@ -136,16 +136,13 @@ class UIProperties:  # pragma: no cover
 		"""
 		if not self._properties:
 			return False
+		if element not in self.properties:
+			return False
 		if self._instance.game.game in ['tm', 'sm']:
-			if element not in self.properties:
-				return False
 			if '@{}'.format(attribute) not in self.properties[element]:
 				return False
 			self.properties[element]['@{}'.format(attribute)] = value
 		else:
-			if element not in self.properties:
-				return False
-
 			self.properties[element][attribute] = value
 			if element not in self._update_properties:
 				self._update_properties[element] = dict(id=element)

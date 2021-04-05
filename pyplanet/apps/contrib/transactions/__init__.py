@@ -21,7 +21,7 @@ class Transactions(AppConfig):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-		self.current_bills = dict()
+		self.current_bills = {}
 		self.min_donation = 10
 		self.public_appreciation = 100
 		self.lock = asyncio.Lock()
@@ -162,20 +162,18 @@ class Transactions(AppConfig):
 
 				del self.current_bills[bill_id]
 			elif state == 5:
+				message = '$i$f00Transaction refused!'
 				if current_bill['amount'] > 0:
-					message = '$i$f00Transaction refused!'
 					await self.instance.chat(message, current_bill['player'].login)
 				else:
-					message = '$i$f00Transaction refused!'
 					await self.instance.chat(message, current_bill['admin'].login)
 
 				del self.current_bills[bill_id]
 			elif state == 6:
+				message = '$i$f00Transaction failed: $fff{}$f00!'.format(state_name)
 				if current_bill['amount'] > 0:
-					message = '$i$f00Transaction failed: $fff{}$f00!'.format(state_name)
 					await self.instance.chat(message, current_bill['player'].login)
 				else:
-					message = '$i$f00Transaction failed: $fff{}$f00!'.format(state_name)
 					await self.instance.chat(message, current_bill['admin'].login)
 
 				del self.current_bills[bill_id]

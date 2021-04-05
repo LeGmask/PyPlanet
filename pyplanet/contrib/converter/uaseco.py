@@ -18,7 +18,7 @@ class UasecoConverter(BaseConverter):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.player_cache = dict()
-		self.map_cache = dict()
+		self.map_cache = {}
 
 		if not self.prefix:
 			self.prefix = 'uaseco_'

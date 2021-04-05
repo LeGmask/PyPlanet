@@ -47,9 +47,7 @@ class TemplateCommand(BaseCommand):
 				os.makedirs(top_dir)
 			except FileExistsError:
 				listdir = os.listdir(top_dir)
-				if len(listdir) == 0 or (len(listdir) == 1 and 'env' in listdir):
-					pass
-				else:
+				if len(listdir) != 0 and (len(listdir) != 1 or 'env' not in listdir):
 					raise CommandError("'%s' already exists" % top_dir)
 			except OSError as e:
 				raise CommandError(e)

@@ -18,7 +18,7 @@ class Xaseco2Converter(BaseConverter):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.player_cache = dict()
-		self.map_cache = dict()
+		self.map_cache = {}
 
 	async def migrate(self, _):
 		print('Migrating players...')

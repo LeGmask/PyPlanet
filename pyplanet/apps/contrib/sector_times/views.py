@@ -20,9 +20,8 @@ class SectorTimesWidget(WidgetView):
 
 	@property
 	def widget_x(self):
-		if self.app:
-			if self.app.instance.game.game == 'tmnext':
-				return -55
+		if self.app and self.app.instance.game.game == 'tmnext':
+			return -55
 		return 20
 
 	async def get_per_player_data(self, login):
@@ -33,14 +32,14 @@ class SectorTimesWidget(WidgetView):
 		if 'dedimania' in self.app.instance.apps.apps:
 			try:
 				dedi_record = [x for x in self.app.instance.apps.apps['dedimania'].current_records if x.login == login]
-				if len(dedi_record) > 0:
+				if dedi_record:
 					dedi_record = dedi_record[0]
 			except:
 				pass
 		if 'local_records' in self.app.instance.apps.apps:
 			try:
 				local_record = [x for x in self.app.instance.apps.apps['local_records'].current_records if x.player.login == login]
-				if len(local_record) > 0:
+				if local_record:
 					local_record = local_record[0]
 			except:
 				pass
@@ -53,18 +52,18 @@ class SectorTimesWidget(WidgetView):
 		# Get fastest score, source and checkpoint scores.
 		fastest_score = 0
 		fastest_source = ''
-		fastest_cps = list()
+		fastest_cps = []
 		if dedi_score > 0 and (local_score <= 0 or dedi_score < local_score):
 			fastest_score = dedi_score
 			fastest_cps = dedi_record.cps
 			fastest_source = 'Dedi'
-		elif local_score > 0 and (dedi_score <= 0 or local_score <= dedi_score):
+		elif local_score > 0:
 			fastest_score = local_score
 			fastest_cps = local_record.checkpoints
 			fastest_source = 'Local'
 
 		if isinstance(fastest_cps, list):
-			fastest_cps = ','.join([str(c) for c in fastest_cps])
+			fastest_cps = ','.join(str(c) for c in fastest_cps)
 
 		context = await super().get_per_player_data(login)
 		context['record_sector_times'] = fastest_cps
@@ -100,14 +99,14 @@ class CheckpointDiffWidget(WidgetView):
 		if 'dedimania' in self.app.instance.apps.apps:
 			try:
 				dedi_record = [x for x in self.app.instance.apps.apps['dedimania'].current_records if x.login == login]
-				if len(dedi_record) > 0:
+				if dedi_record:
 					dedi_record = dedi_record[0]
 			except:
 				pass
 		if 'local_records' in self.app.instance.apps.apps:
 			try:
 				local_record = [x for x in self.app.instance.apps.apps['local_records'].current_records if x.player.login == login]
-				if len(local_record) > 0:
+				if local_record:
 					local_record = local_record[0]
 			except:
 				pass
@@ -120,16 +119,16 @@ class CheckpointDiffWidget(WidgetView):
 		# Get fastest score, source and checkpoint scores.
 		fastest_score = 0
 		fastest_source = 'PB'
-		fastest_cps = list()
+		fastest_cps = []
 		if dedi_score > 0 and (local_score <= 0 or dedi_score < local_score):
 			fastest_score = dedi_score
 			fastest_cps = dedi_record.cps
-		elif local_score > 0 and (dedi_score <= 0 or local_score <= dedi_score):
+		elif local_score > 0:
 			fastest_score = local_score
 			fastest_cps = local_record.checkpoints
 
 		if isinstance(fastest_cps, list):
-			fastest_cps = ','.join([str(c) for c in fastest_cps])
+			fastest_cps = ','.join(str(c) for c in fastest_cps)
 
 		context = await super().get_per_player_data(login)
 		context['record_sector_times'] = fastest_cps

@@ -146,7 +146,7 @@ class _ManiaLink:
 		:return:
 		"""
 		if action not in self.receivers:
-			self.receivers[action] = list()
+			self.receivers[action] = []
 		self.receivers[action].append(target)
 
 	async def handle(self, player, action, values, **kwargs):
@@ -205,7 +205,7 @@ class _ManiaLink:
 			await self.manager.destroy(self)
 		except:
 			pass
-		self.receivers = dict()
+		self.receivers = {}
 		self.data = None
 		self.player_data = None
 
@@ -222,7 +222,7 @@ class _ManiaLink:
 			asyncio.ensure_future(self.manager.destroy(self))
 		except Exception as e:
 			logging.exception(e)
-		self.receivers = dict()
+		self.receivers = {}
 		self.data = None
 		self.player_data = None
 

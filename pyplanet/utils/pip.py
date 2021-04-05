@@ -53,7 +53,7 @@ class Pip:
 		# Checking PIP installation and compatibility...
 		test_package = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'pip_test_pkg')
 		temp_file = tempfile.NamedTemporaryFile()
-		data = dict()
+		data = {}
 
 		try:
 			p = subprocess.Popen(

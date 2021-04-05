@@ -16,7 +16,7 @@ async def handle_playlist_modified(source, signal, **kwargs):
 	# Make sure the map manager fetches the updated maplist.
 	updated = await Controller.instance.map_manager.handle_playlist_change(source)
 	if not isinstance(source, dict):
-		source = dict()
+		source = {}
 	source['maps_updated'] = updated
 	return source
 

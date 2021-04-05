@@ -63,11 +63,11 @@ class SettingMenuView(ManualListView):
 	def value_renderer(self, row, field, **kwargs):
 		if row[field['index']] is None:
 			return '-'
-		if row['type'] == str or row['type'] == int or row['type'] == float or row['type'] == bool:
+		if row['type'] in [str, int, float, bool]:
 			return str(row[field['index']])
 		elif row['type'] == dict:
 			return 'Dictionary, edit to show'
-		elif row['type'] == set or row['type'] == list:
+		elif row['type'] in [set, list]:
 			return '{} values, edit to show'.format(len(row[field['index']]))
 		return 'Unknown type {}'.format(row['type_name'])
 
@@ -201,13 +201,13 @@ class SettingEditView(TemplateView):
 
 		# Convert list.
 		raw_list = None
-		if self.setting.type == list or self.setting.type == set:
+		if self.setting.type in [list, set]:
 			raw_list = str(raw_value).splitlines()
-			if self.setting.type == set:
-				raw_list = set(raw_list)
+		if self.setting.type == set:
+			raw_list = set(raw_list)
 
 		try:
-			if self.setting.type == list or self.setting.type == set:
+			if self.setting.type in [list, set]:
 				await self.setting.set_value(raw_list if len(raw_list) > 0 else None)
 			else:
 				await self.setting.set_value(raw_value)

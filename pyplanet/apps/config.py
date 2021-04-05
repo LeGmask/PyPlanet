@@ -187,10 +187,8 @@ class AppConfig:
 
 	def is_mode_supported(self, mode):
 		if self.mode_dependencies:
-			for mode_requirement in self.mode_dependencies:
-				if mode_requirement.lower() in mode.lower():
-					return True
-			return False
+			return any(mode_requirement.lower() in mode.lower()
+			           for mode_requirement in self.mode_dependencies)
 		return True
 
 	def is_game_supported(self, game):

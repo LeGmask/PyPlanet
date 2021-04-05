@@ -85,8 +85,8 @@ class Player(TimedModel):
 
 	async def save(self, *args, **kwargs):
 		res = await super().save(*args, **kwargs)
-		if self.login not in self.CACHE or (self.login in self.CACHE and id(self) != id(self.CACHE[self.login])):
-			if self.login in self.CACHE and id(self) != id(self.CACHE[self.login]):
+		if self.login not in self.CACHE or id(self) != id(self.CACHE[self.login]):
+			if self.login in self.CACHE:
 				self.__flow = self.CACHE[self.login].flow
 				self.__attributes = self.CACHE[self.login].attributes
 			self.CACHE[self.login] = self
@@ -140,7 +140,7 @@ class PlayerFlow:
 		self.has_joined_game = None
 		self.zone = None
 		self.joined_at = None
-		self.other = dict()
+		self.other = {}
 
 	def start_run(self):
 		self.in_run = True
@@ -179,7 +179,7 @@ class PlayerAttributes:
 	Hold custom attributes by keys used in several apps.
 	"""
 	def __init__(self):
-		self.__attributes = dict()
+		self.__attributes = {}
 
 	def set(self, key, value):
 		"""

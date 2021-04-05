@@ -132,7 +132,7 @@ class MapManager(CoreContrib):
 
 	async def update_list(self, full_update=False, detach_fks=True):
 		raw_list = await self._instance.gbx('GetMapList', -1, 0)
-		updated = list()
+		updated = []
 
 		if full_update:
 			# Query all existing entries from database.
@@ -144,7 +144,7 @@ class MapManager(CoreContrib):
 			diff = [x for x in raw_list if x['UId'] not in db_uids]
 
 			# Insert all missing maps into the DB.
-			rows = list()
+			rows = []
 			for details in diff:
 				mx_id = self._extract_mx_id(details['FileName'])
 
@@ -161,7 +161,7 @@ class MapManager(CoreContrib):
 					map_type=details['MapType'], map_style=details['MapStyle'], mx_id=mx_id
 				))
 
-			if len(rows) > 0:
+			if rows:
 				await Map.execute(Map.insert_many(rows))
 				maps += list(await Map.execute(
 					Map.select().where(Map.uid << [m['uid'] for m in rows])
@@ -172,7 +172,7 @@ class MapManager(CoreContrib):
 
 			# Reload locals for all maps.
 			# TODO: Find better way to remove this and handle it on the folders way.
-			coroutines = list()
+			coroutines = []
 			if 'local_records' in self._instance.apps.apps:
 				if detach_fks:
 					asyncio.ensure_future(self._instance.apps.apps['local_records'].load_map_locals())
@@ -192,7 +192,7 @@ class MapManager(CoreContrib):
 			# Only update/insert the changed bits, (not checking for removed maps!!).
 			async with self.lock:
 				for details in raw_list:
-					if not any(m.uid == details['UId'] for m in self._maps):
+					if all(m.uid != details['UId'] for m in self._maps):
 						# Detect any MX-id from the filename.
 						mx_id = self._extract_mx_id(details['FileName'])
 
@@ -309,10 +309,7 @@ class MapManager(CoreContrib):
 		:param uid: UID String
 		:return: Boolean, True if it's in our current playlist (match settings in our session).
 		"""
-		for map_instance in self.maps:
-			if map_instance.uid == uid:
-				return True
-		return False
+		return any(map_instance.uid == uid for map_instance in self.maps)
 
 	async def add_map(self, filename, insert=True, save_matchsettings=True):
 		"""
@@ -503,12 +500,11 @@ class MapManager(CoreContrib):
 
 		if not extend_with:
 			extend_with = original_ta
-		if extend_with > 2000000000:
-			extend_with = 2000000000
+		extend_with = min(extend_with, 2000000000)
 
 		temp_mode_settings['S_TimeLimit'] += abs(extend_with)
-		if temp_mode_settings['S_TimeLimit'] > 2000000000:
-			temp_mode_settings['S_TimeLimit'] = 2000000000
+		temp_mode_settings['S_TimeLimit'] = min(temp_mode_settings['S_TimeLimit'],
+		                                        2000000000)
 
 		if not self._is_extended or not self._original_ta:
 			self._original_ta = mode_settings['S_TimeLimit']

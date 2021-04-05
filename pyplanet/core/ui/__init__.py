@@ -19,8 +19,8 @@ class _BaseUIManager:
 		:type instance: pyplanet.core.instance.Instance
 		"""
 		self.instance = instance
-		self.manialinks = dict()
-		self.send_queue = list()
+		self.manialinks = {}
+		self.send_queue = []
 
 	async def on_start(self):
 		asyncio.ensure_future(self.send_loop())
@@ -68,13 +68,13 @@ class _BaseUIManager:
 		:param players: Player instances or logins to post to. None to globally send.
 		:type manialink: pyplanet.core.ui.components.manialink._ManiaLink
 		"""
-		queries = list()
+		queries = []
 		if isinstance(players, list):
 			for_logins = [p.login if isinstance(p, Player) else p for p in players]
 		elif manialink.player_data:
 			for_logins = list(manialink.player_data.keys())
 		else:
-			for_logins = list()
+			for_logins = []
 
 		# Register to the manialink context.
 		if manialink.id not in self.manialinks:
@@ -161,7 +161,7 @@ class _BaseUIManager:
 		:type manialink: pyplanet.core.ui.components.manialink._ManiaLink
 		"""
 		body = '<manialink id="{}"></manialink>'.format(manialink.id)
-		queries = list()
+		queries = []
 		if logins and len(logins) > 0:
 			queries.append(
 				self.instance.gbx('SendDisplayManialinkPageToLogin', ','.join(logins), body, 0, False)
@@ -198,7 +198,7 @@ class _BaseUIManager:
 class GlobalUIManager(_BaseUIManager):
 	def __init__(self, instance):
 		super().__init__(instance)
-		self.app_managers = dict()
+		self.app_managers = {}
 		self.properties = UIProperties(self.instance)
 
 	async def on_start(self):

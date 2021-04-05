@@ -13,7 +13,7 @@ class FolderManager:
 
 		# Initiate global folders.
 		self.auto_folders = list()
-		self.public_folders = list()
+		self.public_folders = []
 
 	async def on_start(self):
 		"""
@@ -30,7 +30,7 @@ class FolderManager:
 		:return:
 		"""
 		# Prepare variables.
-		self.auto_folders = list()
+		self.auto_folders = []
 
 		days_filter = await self.app.setting_newest_days_range.get_value()
 		self.auto_folders.append({
@@ -65,9 +65,7 @@ class FolderManager:
 		)
 
 		# Convert to the wanted objects.
-		folder_list = list()
-		folder_list.extend(self.auto_folders.copy())
-
+		folder_list = list(self.auto_folders.copy())
 		for folder in raw_list:
 			folder_id = 'database_{}'.format(folder.get_id())
 			folder_list.append(

@@ -118,7 +118,8 @@ class DedimaniaAPI:
 					# Replace session_id in args.
 					if len(args) > 0 and len(args[0]) > 0 and isinstance(args[0][0], dict) and 'params' in args[0][0]:
 						new_params = list(args[0][0]['params'])
-						if len(new_params) > 0 and isinstance(new_params[0], str) and new_params[0] == original_session_id:
+						if (new_params and isinstance(new_params[0], str)
+						    and new_params[0] == original_session_id):
 							new_params[0] = self.session_id
 							args[0][0]['params'] = tuple(new_params)
 
@@ -312,7 +313,9 @@ class DedimaniaAPI:
 			raise DedimaniaTransportException('Dedimania not authenticated!')
 
 		times = [{
-			'Login': r.login, 'Best': r.score, 'Checks': ','.join([str(c) for c in r.cps]),
+		    'Login': r.login,
+		    'Best': r.score,
+		    'Checks': ','.join(str(c) for c in r.cps),
 		} for r in records if r.updated]
 		replays = {
 			'VReplay': v_replay or None,
@@ -351,7 +354,7 @@ class DedimaniaRecord:
 		self.cps = cps
 		self.vote = vote
 
-		self.race_cps = list()
+		self.race_cps = []
 
 		self.updated = False
 		self.new_index = None

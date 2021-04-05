@@ -188,8 +188,9 @@ class MXKarma:
 				player_vote = [v for v in self.current_votes if v['login'] == login]
 
 			new_score = await self.determine_vote(score)
-			if len(player_vote) == 0 or (len(player_vote) == 1 and player_vote[0]['vote'] != new_score):
+			if not player_vote or (len(player_vote) == 1
+			                       and player_vote[0]['vote'] != new_score):
 				save_votes.append({'login': login, 'nickname': vote.player.nickname, 'vote': new_score})
 
-		if len(save_votes) > 0:
+		if save_votes:
 			await self.api.save_votes(map=self.app.instance.map_manager.current_map, map_length=current_map_length, votes=save_votes)

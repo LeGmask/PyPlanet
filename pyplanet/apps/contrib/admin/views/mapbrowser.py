@@ -29,7 +29,7 @@ class BrowserView(ManualListView):
 		self.sort_field = self.fields[0]
 
 	async def set_dir(self, directory):
-		self.objects_raw = list()
+		self.objects_raw = []
 		self.current_dir = directory
 		self.title = 'Local Maps     $n$aaa' + self.current_dir
 

@@ -36,20 +36,12 @@ class Signal:
 			process_target = self.process
 		self.process_target = process_target
 
-		self.receivers = list()
-		self.self_refs = dict()
+		self.receivers = []
+		self.self_refs = {}
 		self.lock = threading.Lock()
 
-		if code:
-			self.code = code
-		else:
-			self.code = self.Meta.code
-
-		if namespace:
-			self.namespace = namespace
-		else:
-			self.namespace = self.Meta.namespace
-
+		self.code = code or self.Meta.code
+		self.namespace = namespace or self.Meta.namespace
 		self.use_caching = use_caching
 		self.sender_receivers_cache = weakref.WeakKeyDictionary() if use_caching else {}
 		self._dead_receivers = False
@@ -121,11 +113,7 @@ class Signal:
 		:param dispatch_uid: An identifier used to uniquely identify a particular instance of
 			a receiver. This will usually be a string, though it may be anything hashable.
 		"""
-		if dispatch_uid:
-			lookup_key = dispatch_uid
-		else:
-			lookup_key = _make_id(receiver)
-
+		lookup_key = dispatch_uid or _make_id(receiver)
 		if weak:
 			ref = weakref.ref
 			receiver_object = receiver
@@ -155,11 +143,7 @@ class Signal:
 		:param receiver: The registered receiver to disconnect. May be none if dispatch_uid is specified.
 		:param dispatch_uid: the unique identifier of the receiver to disconnect
 		"""
-		if dispatch_uid:
-			lookup_key = dispatch_uid
-		else:
-			lookup_key = _make_id(receiver)
-
+		lookup_key = dispatch_uid or _make_id(receiver)
 		disconnected = False
 		with self.lock:
 			self._clear_dead_receivers()

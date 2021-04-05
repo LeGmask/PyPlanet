@@ -59,14 +59,12 @@ class JukeboxListView(ManualListView):
 		await self.refresh(player=player)
 
 	async def get_data(self):
-		index = 1
-		items = []
-		for item in self.app.jukebox:
-			items.append({'index': index, 'map_name': item['map'].name, 'player_nickname': item['player'].nickname,
-						  'player_login': item['player'].login})
-			index += 1
-
-		return items
+		return [{
+		    'index': index,
+		    'map_name': item['map'].name,
+		    'player_nickname': item['player'].nickname,
+		    'player_login': item['player'].login,
+		} for index, item in enumerate(self.app.jukebox, start=1)]
 
 
 class MapListView(ManualListView):
@@ -85,14 +83,14 @@ class MapListView(ManualListView):
 		self.manager = app.context.ui
 		self.player = player
 		self.advanced = False
-		self.cache = list()
+		self.cache = []
 		self.cache_advanced = False
 
 	async def get_data(self):
 		if self.cache and self.advanced == self.cache_advanced:
 			return self.cache
 
-		data = list()
+		data = []
 
 		local_app_installed = 'local_records' in self.app.instance.apps.apps
 		karma_app_installed = 'karma' in self.app.instance.apps.apps
@@ -265,12 +263,11 @@ class MapListView(ManualListView):
 		await self.app.folder_manager.display_folder_list(player)
 
 	async def action_advanced(self, player, values, **kwargs):
-		if len(self.app.instance.map_manager.maps) > 500:
-			if self.player.level == 0:
-				await self.app.instance.chat(
-					'This server contains 500+ maps. Advanced map list only activated for admins!', self.player
-				)
-				return
+		if len(self.app.instance.map_manager.maps) > 500 and self.player.level == 0:
+			await self.app.instance.chat(
+				'This server contains 500+ maps. Advanced map list only activated for admins!', self.player
+			)
+			return
 
 		if self.advanced:
 			self.advanced = False
@@ -304,11 +301,11 @@ class MapListView(ManualListView):
 
 	async def destroy(self):
 		await super().destroy()
-		self.cache = list()
+		self.cache = []
 
 	def destroy_sync(self):
 		super().destroy_sync()
-		self.cache = list()
+		self.cache = []
 
 
 class FolderMapListView(MapListView):
@@ -328,7 +325,7 @@ class FolderMapListView(MapListView):
 		self.folder_code = folder_code
 		self.player = player
 
-		self.map_list = list()
+		self.map_list = []
 		self.folder_info = None
 		self.folder_instance = None
 
@@ -375,7 +372,7 @@ class FolderMapListView(MapListView):
 		cancel = bool(await ask_confirmation(player, 'Are you sure you want to remove the map \'{}\'$z$s from the folder?'.format(
 			map_dictionary['name']
 		), size='sm'))
-		if cancel is True:
+		if cancel:
 			return
 
 		# Remove from folder.
@@ -547,7 +544,7 @@ class FolderListView(ManualListView):
 		cancel = bool(await ask_confirmation(player, 'Are you sure you want to remove folder \'{}\'$z$s?'.format(
 			folder_dictionary['name']
 		), size='sm'))
-		if cancel is True:
+		if cancel:
 			return
 
 		# Remove maps from folder.

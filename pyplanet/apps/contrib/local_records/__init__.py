@@ -73,7 +73,7 @@ class LocalRecords(AppConfig):
 			map.local = await self.get_map_record(map)
 		else:
 			maps = {m.id: m for m in self.instance.map_manager.maps}
-			map_locals = dict()
+			map_locals = {}
 
 			# Fetch all.
 			rows = await LocalRecord.execute(
@@ -85,7 +85,7 @@ class LocalRecords(AppConfig):
 			# Group by map.
 			for row in rows:
 				if row.map_id not in map_locals:
-					map_locals[row.map_id] = list()
+					map_locals[row.map_id] = []
 				map_locals[row.map_id].append(row)
 
 			# Map local stats.
@@ -131,11 +131,9 @@ class LocalRecords(AppConfig):
 				.order_by(LocalRecord.score.asc())
 		)
 
-		rank = 1
-		for rec in record_list:
+		for rank, rec in enumerate(record_list, start=1):
 			if rec.player == player:
 				return rank, rec
-			rank += 1
 		return None, None
 
 	async def get_local(self, id):
@@ -204,7 +202,7 @@ class LocalRecords(AppConfig):
 			previous_index = None
 			previous_time = None
 
-			if len(current_records) > 0:
+			if current_records:
 				current_record = current_records[0]
 				if score > current_record.score:
 					# No improvement, ignore
@@ -233,7 +231,7 @@ class LocalRecords(AppConfig):
 
 			# Set details (score + cps times).
 			current_record.score = score
-			current_record.checkpoints = ','.join([str(cp) for cp in cps])
+			current_record.checkpoints = ','.join(str(cp) for cp in cps)
 
 			# Add to list when it's a new record!
 			if current_record.get_id() is None:
@@ -301,8 +299,7 @@ class LocalRecords(AppConfig):
 			message = '$0f3Current Local Record: $fff\uf017 {}$z$s$0f3 by $fff{}$z$s$0f3 ($fff{}$0f3 records)'.format(
 				times.format_time(first_record.score), first_record.player.nickname, records_amount
 			)
-			calls = list()
-			calls.append(self.instance.chat(message))
+			calls = [self.instance.chat(message)]
 			for player in self.instance.player_manager.online:
 				calls.append(self.chat_personal_record(player, record_limit))
 			await self.instance.gbx.multicall(*calls)
@@ -318,14 +315,14 @@ class LocalRecords(AppConfig):
 
 		record = [x for x in records if x.player_id == player.get_id()]
 
-		if len(record) > 0:
+		if record:
 			message = '$0f3You currently hold the $fff{}.$0f3 Local Record: $fff\uf017 {}'.format(
 				self.current_records.index(record[0]) + 1, times.format_time(record[0].score)
 			)
-			return self.instance.chat(message, player)
 		else:
 			message = '$0f3You don\'t have a Local Record on this map yet.'
-			return self.instance.chat(message, player)
+
+		return self.instance.chat(message, player)
 
 	async def command_localcps(self, player, data, *args, **kwargs):
 		"""

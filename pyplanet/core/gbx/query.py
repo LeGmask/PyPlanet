@@ -77,18 +77,14 @@ class ScriptQuery(Query):
 		"""
 		# Make sure we call the script stuff with TriggerModeScriptEventArray.
 		gbx_method = 'TriggerModeScriptEventArray'
-		gbx_args = list()
+		gbx_args = []
 
 		# Make sure we generate a response_id.
-		if response_id is True:
-			self.response_id = uuid.uuid4().hex
-		else:
-			self.response_id = None
-
+		self.response_id = uuid.uuid4().hex if response_id is True else None
 		# Encode to json if args are given, and encode_json is true (default).
 		if encode_json and len(args) > 0:
 			gbx_args.append(json.dumps(args))
-		elif not encode_json and len(args) > 0:
+		elif len(args) > 0:
 			gbx_args.extend(args)
 
 		# Add the response_id to the end of the argument list.

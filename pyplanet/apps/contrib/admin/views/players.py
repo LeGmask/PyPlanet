@@ -136,12 +136,8 @@ class PlayerListView(ManualListView):
 
 	async def action_ignore(self, user, values, player, *args, **kwargs):
 		ignore_list = await self.app.instance.gbx('GetIgnoreList', -1, 0)
-		in_list = False
-		for entry in ignore_list:
-			if entry and entry['Login'] == player['login']:
-				in_list = True
-				break
-
+		in_list = any(
+		    entry and entry['Login'] == player['login'] for entry in ignore_list)
 		if not in_list:
 			await self.app.instance.command_manager.execute(user, '//ignore', player['login'])
 		else:

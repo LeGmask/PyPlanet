@@ -11,7 +11,7 @@ class _UpdateChecker:  # pragma: no cover
 		self.latest = None
 		self.current = None
 		self.instance = None
-		self.releases = list()
+		self.releases = []
 
 		self.url = 'https://api.github.com/repos/{}/releases'.format('PyPlanet/PyPlanet')
 
@@ -44,7 +44,7 @@ class _UpdateChecker:  # pragma: no cover
 
 		async with aiohttp.ClientSession() as session:
 			async with session.get(self.url) as resp:
-				self.releases = list()
+				self.releases = []
 				for release in await resp.json():
 					self.releases.append(release['tag_name'])
 

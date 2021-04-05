@@ -97,7 +97,7 @@ class MapAdmin:
 		cancel = bool(await ask_confirmation(player, 'Are you sure you want to remove the map \'{}\'$z$s from the server?'.format(
 			map_dictionary['name']
 		), size='sm'))
-		if cancel is True:
+		if cancel:
 			return
 
 		# Simulate command.
@@ -240,7 +240,7 @@ class MapAdmin:
 		juke_maps = await self.setting_juke_after_adding.get_value()
 		if 'jukebox' not in self.instance.apps.apps:
 			juke_maps = False
-		juke_list = list()
+		juke_list = []
 
 		try:
 			# Parse GBX file.
@@ -255,18 +255,17 @@ class MapAdmin:
 			# Insert map to server.
 			result = await self.instance.map_manager.add_map(map_file)
 
-			if result:
-				# Juke if setting has been provided.
-				if juke_maps:
-					juke_list.append(map_info['uid'])
-
-				message = '$ff0Admin $fff{}$z$s$ff0 has added{} the map $fff{}$z$s$ff0 by $fff{}$z$s$ff0.'.format(
-					player.nickname, ' and juked' if juke_maps else '', map_info['name'], map_info['author_nickname']
-				)
-				await self.instance.chat(message)
-			else:
+			if not result:
 				raise Exception('Unknown error while adding the map!')
 
+			# Juke if setting has been provided.
+			if juke_maps:
+				juke_list.append(map_info['uid'])
+
+			message = '$ff0Admin $fff{}$z$s$ff0 has added{} the map $fff{}$z$s$ff0 by $fff{}$z$s$ff0.'.format(
+				player.nickname, ' and juked' if juke_maps else '', map_info['name'], map_info['author_nickname']
+			)
+			await self.instance.chat(message)
 			# Save match settings after inserting maps.
 			try:
 				await self.instance.map_manager.save_matchsettings()
@@ -280,7 +279,7 @@ class MapAdmin:
 				pass
 
 			# Jukebox all the maps requested, in order.
-			if juke_maps and len(juke_list) > 0:
+			if juke_maps and juke_list:
 				# Fetch map objects.
 				for juke_uid in juke_list:
 					map_instance = await self.instance.map_manager.get_map(uid=juke_uid)

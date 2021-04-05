@@ -60,7 +60,7 @@ class MusicServer(AppConfig):
 				await self.instance.chat(message, player)
 				return
 
-			if not any(item['song'] == new_song for item in self.playlist):
+			if all(item['song'] != new_song for item in self.playlist):
 				await self.insert_song(player.nickname, new_song)
 				message = '$fff{}$z$s$fa0 was added to the playlist by $fff{}$z$s$fa0.'\
 					.format(new_song[1]['artist']+" - "+new_song[1]['title'], player.nickname)

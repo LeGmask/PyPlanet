@@ -35,7 +35,7 @@ class Migrator:
 		self.pass_migrations = set()
 
 	def __get_migrator(self):
-		if isinstance(self.db.engine, peewee.SqliteDatabase) or isinstance(self.db.engine, SqliteExtDatabase):
+		if isinstance(self.db.engine, (peewee.SqliteDatabase, SqliteExtDatabase)):
 			return SqliteMigrator(self.db.engine)
 		elif isinstance(self.db.engine, peewee.MySQLDatabase):
 			return MySQLMigrator(self.db.engine)
@@ -44,7 +44,7 @@ class Migrator:
 		raise ImproperlyConfigured('Database engine doesn\'t support Migrations!')
 
 	async def create_tables(self):
-		creating = list()
+		creating = []
 		for name, (app, name, model) in self.db.registry.models.items():
 			if not model.table_exists():
 				creating.append(model)
@@ -63,18 +63,17 @@ class Migrator:
 					self.db.engine.database
 				)
 				result = cursor.fetchone()
-				if len(result) == 1:
-					if result[0] != 'utf8mb4_unicode_ci':
-						logger.error(
-							'Your database, tables and column collate is \'{}\' and it should be \'utf8mb4_unicode_ci\'! '
-							'Please change your database collate right now!'.format(result[0])
-						)
-						logger.warning(
-							'Please read the information on this page on how to convert your collate: '
-							'http://www.pypla.net/en/stable/howto/dbcollate.html'
-						)
-						logger.info('Wait 5 seconds to ignore!... (We strongly advice to change it!)')
-						await asyncio.sleep(5)
+				if len(result) == 1 and result[0] != 'utf8mb4_unicode_ci':
+					logger.error(
+						'Your database, tables and column collate is \'{}\' and it should be \'utf8mb4_unicode_ci\'! '
+						'Please change your database collate right now!'.format(result[0])
+					)
+					logger.warning(
+						'Please read the information on this page on how to convert your collate: '
+						'http://www.pypla.net/en/stable/howto/dbcollate.html'
+					)
+					logger.info('Wait 5 seconds to ignore!... (We strongly advice to change it!)')
+					await asyncio.sleep(5)
 		except:
 			pass  # Totally ignore.
 

@@ -157,7 +157,7 @@ class LiveRankings(AppConfig):
 			return
 
 		current_rankings = [x for x in self.current_rankings if x['login'] == player.login]
-		if len(current_rankings) > 0:
+		if current_rankings:
 			current_ranking = current_rankings[0]
 			current_ranking['giveup'] = True
 
@@ -169,7 +169,7 @@ class LiveRankings(AppConfig):
 			return
 
 		current_rankings = [x for x in self.current_rankings if x['login'] == player.login]
-		if len(current_rankings) > 0:
+		if current_rankings:
 			current_ranking = current_rankings[0]
 			current_ranking['score'] = raw['racetime']
 			current_ranking['cps'] = (raw['checkpointinrace'] + 1)
@@ -196,7 +196,7 @@ class LiveRankings(AppConfig):
 		if 'timeattack' in current_script or 'trackmania/tm_timeattack_online' in current_script:
 			current_rankings = [x for x in self.current_rankings if x['login'] == player.login]
 			score = lap_time
-			if len(current_rankings) > 0:
+			if current_rankings:
 				current_ranking = current_rankings[0]
 
 				if score < current_ranking['score']:

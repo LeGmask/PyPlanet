@@ -104,7 +104,7 @@ class Setting:
 				return float(value)
 			elif self.type == bool:
 				return bool(value)
-			elif self.type == list or self.type == set or self.type == dict:
+			elif self.type in [list, set, dict]:
 				return json.loads(value)
 			else:
 				raise TypeUnknownException('The type \'{}\' is unknown!'.format(self.type))
@@ -137,7 +137,7 @@ class Setting:
 			elif self.type == float:
 				value = float(value)
 			elif self.type == bool:
-				if value == '1' or value == 1 or value == '0' or value == 0:
+				if value in ['1', 1, '0', 0]:
 					value = bool(int(value))
 		except:
 			pass
@@ -147,7 +147,7 @@ class Setting:
 				'Your given value is not of the type you specified! \'{}\' != \'{}\''.format(type(value), self.type)
 			)
 
-		if self.type == list or self.type == set or self.type == dict:
+		if self.type in [list, set, dict]:
 			return json.dumps(value)
 		if self.type == bool:
 			return value
@@ -168,7 +168,7 @@ class Setting:
 			return 'float'
 		elif self.type == bool:
 			return 'boolean'
-		elif self.type == list or self.type == set:
+		elif self.type in [list, set]:
 			return 'list'
 		elif self.type == dict:
 			return 'dict'

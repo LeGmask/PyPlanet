@@ -15,7 +15,7 @@ class JsonConfigBackend(FileConfigBackend):
 		super().load()
 
 		# Load the files and parse JSON.
-		parsed_settings = dict()
+		parsed_settings = {}
 
 		for file_name in self.files:
 			try:

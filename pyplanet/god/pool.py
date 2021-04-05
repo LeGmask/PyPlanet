@@ -24,7 +24,7 @@ class EnvironmentPool:
 	def __init__(self, pool_names, max_restarts=0, options=None):
 		self.names = pool_names
 		self.queue = multiprocessing.Queue()
-		self.pool = dict()
+		self.pool = {}
 		self.max_restarts = max_restarts
 		self.options = options or dict()
 
@@ -40,15 +40,11 @@ class EnvironmentPool:
 		# TODO: Find out how to get the watchdog + livereload working on a later moment.
 		# self.dog_observer.start()
 
-		self._restarts = dict()
+		self._restarts = {}
 
 	@property
 	def num_online(self):
-		count = 0
-		for proc in self.pool.values():
-			if not proc.did_die:
-				count += 1
-		return count
+		return sum(not proc.did_die for proc in self.pool.values())
 
 	def populate(self):
 		"""

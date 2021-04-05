@@ -76,7 +76,7 @@ class Karma(AppConfig):
 			map.karma = await self.get_map_karma(map)
 		else:
 			maps = {m.id: m for m in self.instance.map_manager.maps}
-			map_karmas = dict()
+			map_karmas = {}
 
 			# Fetch all.
 			rows = await KarmaModel.execute(
@@ -88,7 +88,7 @@ class Karma(AppConfig):
 			# Group by map.
 			for row in rows:
 				if row.map_id not in map_karmas:
-					map_karmas[row.map_id] = list()
+					map_karmas[row.map_id] = []
 				map_karmas[row.map_id].append(row)
 
 			# Map karma stats.
@@ -135,79 +135,84 @@ class Karma(AppConfig):
 		await self.widget.display(player=player)
 
 	async def player_chat(self, player, text, cmd):
-		if not cmd:
-			if text == '+++' or text == '++' or text == '+' or text == '+-' or text == '-+' or text == '-' or text == '--' or text == '---':
-				expanded_voting = await self.setting_expanded_voting.get_value()
-				if expanded_voting is False:
-					if text == '+++' or text == '+' or text == '+-' or text == '-+' or text == '-' or text == '---':
-						return
+		if cmd:
+			return
+		if text in ['+++', '++', '+', '+-', '-+', '-', '--', '---']:
+			expanded_voting = await self.setting_expanded_voting.get_value()
+			if expanded_voting is False and text in ['+++', '+', '+-', '-+', '-', '---']:
+				return
 
-				if self.instance.game.game == 'tm' or self.instance.game.game == 'tmnext':
-					finishes_required = await self.setting_finishes_before_voting.get_value()
-					player_finishes = await Score.objects.count(Score.select().where(Score.map_id == self.instance.map_manager.current_map.get_id()).where(Score.player_id == player.get_id()))
-					if player_finishes < finishes_required:
-						message = '$i$f00You have to finish this map at least $fff{}$f00 times before voting!'.format(finishes_required)
-						await self.instance.chat(message, player)
-						return
+			if self.instance.game.game in ['tm', 'tmnext']:
+				finishes_required = await self.setting_finishes_before_voting.get_value()
+				player_finishes = await Score.objects.count(Score.select().where(Score.map_id == self.instance.map_manager.current_map.get_id()).where(Score.player_id == player.get_id()))
+				if player_finishes < finishes_required:
+					message = '$i$f00You have to finish this map at least $fff{}$f00 times before voting!'.format(finishes_required)
+					await self.instance.chat(message, player)
+					return
 
-				normal_score = -1
-				score = -1
-				if text == '++' or text == '+++':
-					normal_score = 1
-					score = 1
-				elif text == '+':
-					normal_score = 1
-					score = 0.5
-				elif text == '+-' or text == '-+':
-					score = 0
-				elif text == '-':
-					score = -0.5
+			normal_score = -1
+			score = -1
+			if text in ['++', '+++']:
+				normal_score = 1
+				score = 1
+			elif text == '+':
+				normal_score = 1
+				score = 0.5
+			elif text in ['+-', '-+']:
+				score = 0
+			elif text == '-':
+				score = -0.5
 
-				player_votes = [x for x in self.current_votes if x.player_id == player.get_id()]
-				if len(player_votes) > 0:
-					player_vote = player_votes[0]
-					if (player_vote.expanded_score is not None and player_vote.expanded_score != score) or \
+			player_votes = [x for x in self.current_votes if x.player_id == player.get_id()]
+			if player_votes:
+				player_vote = player_votes[0]
+				if (player_vote.expanded_score is not None and player_vote.expanded_score != score) or \
 						(player_vote.expanded_score is None and player_vote.score != score):
-						player_vote.score = normal_score
-						player_vote.expanded_score = score
-						await player_vote.save()
-
-						map = next((m for m in self.instance.map_manager.maps if m.uid == self.instance.map_manager.current_map.uid), None)
-						if map is not None:
-							map.karma = await self.get_map_karma(self.instance.map_manager.current_map)
-
-						message = '$ff0Successfully changed your karma vote to $fff{}$ff0{}!'.format(text,
-							(' (same as $fff{}$ff0)'.format(text[:2]) if text == '+++' or text == '---' else '')
-						)
-						await self.calculate_karma()
-						await asyncio.gather(
-							self.instance.chat(message, player),
-							self.widget.display()
-						)
-					else:
-						message = '$ff0You have already voted $fff{}$ff0 on this map!'.format(text)
-						await self.instance.chat(message, player)
-				else:
-					new_vote = KarmaModel(map=self.instance.map_manager.current_map, player=player, score=normal_score, expanded_score=score)
-					await new_vote.save()
-
-					self.current_votes.append(new_vote)
-					await self.calculate_karma()
+					player_vote.score = normal_score
+					player_vote.expanded_score = score
+					await player_vote.save()
 
 					map = next((m for m in self.instance.map_manager.maps if m.uid == self.instance.map_manager.current_map.uid), None)
 					if map is not None:
 						map.karma = await self.get_map_karma(self.instance.map_manager.current_map)
 
-					message = '$ff0Successfully voted $fff{}$ff0{}!'.format(text,
-						(' (same as $fff{}$ff0)'.format(text[:2]) if text == '+++' or text == '---' else '')
-					)
+					message = (
+					    '$ff0Successfully changed your karma vote to $fff{}$ff0{}!'.format(
+					        text,
+					        ' (same as $fff{}$ff0)'.format(text[:2])
+					        if text in ['+++', '---'] else '',
+					    ))
+					await self.calculate_karma()
 					await asyncio.gather(
 						self.instance.chat(message, player),
 						self.widget.display()
 					)
+				else:
+					message = '$ff0You have already voted $fff{}$ff0 on this map!'.format(text)
+					await self.instance.chat(message, player)
+			else:
+				new_vote = KarmaModel(map=self.instance.map_manager.current_map, player=player, score=normal_score, expanded_score=score)
+				await new_vote.save()
 
-				# Reload map referenced information
-				asyncio.ensure_future(self.load_map_votes(map=self.instance.map_manager.current_map))
+				self.current_votes.append(new_vote)
+				await self.calculate_karma()
+
+				map = next((m for m in self.instance.map_manager.maps if m.uid == self.instance.map_manager.current_map.uid), None)
+				if map is not None:
+					map.karma = await self.get_map_karma(self.instance.map_manager.current_map)
+
+				message = '$ff0Successfully voted $fff{}$ff0{}!'.format(
+				    text,
+				    ' (same as $fff{}$ff0)'.format(text[:2])
+				    if text in ['+++', '---'] else '',
+				)
+				await asyncio.gather(
+					self.instance.chat(message, player),
+					self.widget.display()
+				)
+
+			# Reload map referenced information
+			asyncio.ensure_future(self.load_map_votes(map=self.instance.map_manager.current_map))
 
 	async def get_map_karma(self, map):
 		vote_list = await KarmaModel.objects.execute(KarmaModel.select().where(KarmaModel.map_id == map.get_id()))

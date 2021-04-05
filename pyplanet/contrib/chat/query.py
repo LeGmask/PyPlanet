@@ -65,8 +65,7 @@ class ChatQuery(Query):
 
 		# Replace logins.
 		if isinstance(players, Player):
-			self._logins = set()
-			self._logins.add(players.login)
+			self._logins = {players.login}
 		elif isinstance(players, str):
 			self._logins = set()
 			self._logins.add(players)
@@ -160,9 +159,7 @@ class ChatQuery(Query):
 		:rtype: pyplanet.core.gbx.query.Query
 		"""
 		method = 'ChatSendServerMessage'
-		args = list()
-		args.append(self.get_formatted_message())
-
+		args = [self.get_formatted_message()]
 		if isinstance(self._logins, set):
 			method = 'ChatSendServerMessageToLogin'
 			args.append(','.join(self._logins))
