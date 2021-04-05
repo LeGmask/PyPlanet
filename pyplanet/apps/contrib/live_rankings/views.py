@@ -140,8 +140,7 @@ class LiveRankingsWidget(TimesWidgetView):
 		# Otherwise, take the space below the server information on the top left.
 		self.widget_y = 12.5 if self.app.dedimania_enabled else 70.5
 		self.record_amount = await self.app.setting_rankings_amount.get_value()
-		if self.record_amount < 15:
-			self.record_amount = 15
+		self.record_amount = max(self.record_amount, 15)
 
 		current_script = await self.app.instance.mode_manager.get_current_script()
 		if 'TimeAttack' in current_script or 'TrackMania/TM_TimeAttack_Online' in current_script:
@@ -165,7 +164,6 @@ class LiveRankingsWidget(TimesWidgetView):
 		# If in performance mode, ignore this method.
 		if self.app.instance.performance_mode:
 			return dict()
-		else:
-			for player in self.app.instance.player_manager.online:
-				data[player.login] = dict(times=self.get_widget_records(player))
-			return data
+		for player in self.app.instance.player_manager.online:
+			data[player.login] = dict(times=self.get_widget_records(player))
+		return data

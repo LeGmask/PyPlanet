@@ -30,7 +30,7 @@ class ModeManager(CoreContrib):
 		self._next_full_script = None
 
 		self._next_settings_update = dict()
-		self._next_variables_update = dict()
+		self._next_variables_update = {}
 
 	async def on_start(self):
 		"""
@@ -56,7 +56,7 @@ class ModeManager(CoreContrib):
 				await self.update_variables(self._next_variables_update)
 			except Exception as e:
 				logging.error('Can\'t set the script mode variables! Error: {}'.format(str(e)))
-			self._next_variables_update = dict()
+			self._next_variables_update = {}
 
 		# Make sure we send to the signal when mode is been changed.
 		if self._current_script != self._next_script:
@@ -162,7 +162,7 @@ class ModeManager(CoreContrib):
 		:param update_dict: The dictionary with the partial updated keys and values.
 		"""
 		if not isinstance(self._next_settings_update, dict):
-			self._next_settings_update = dict()
+			self._next_settings_update = {}
 		self._next_settings_update.update(update_dict)
 
 	async def get_variables(self):
@@ -189,5 +189,5 @@ class ModeManager(CoreContrib):
 		:param update_dict: The dictionary with the partial updated keys and values.
 		"""
 		if not isinstance(self._next_variables_update, dict):
-			self._next_variables_update = dict()
+			self._next_variables_update = {}
 		self._next_variables_update.update(update_dict)

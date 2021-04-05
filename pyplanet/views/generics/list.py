@@ -80,7 +80,7 @@ class ListView(TemplateView):
 		self.sort_order = 1
 		self.page = 1
 		self.count = 0
-		self.objects = list()
+		self.objects = []
 
 		self.num_per_page = 20
 
@@ -100,13 +100,11 @@ class ListView(TemplateView):
 
 	@property
 	def order(self):
-		if self.sort_field and isinstance(self.sort_field, Field):
-			if self.sort_order and self.sort_field:
+		if self.sort_field:
+			if self.sort_order or not isinstance(self.sort_field, Field):
 				return self.sort_field
-			elif not self.sort_order and self.sort_field:
+			else:
 				return -self.sort_field
-		elif self.sort_field:
-			return self.sort_field
 		return None
 
 	async def handle_catch_all(self, player, action, values, **kwargs):
@@ -139,12 +137,10 @@ class ListView(TemplateView):
 				field_name = sort_field['index']
 
 			if self.sort_field and current_field_name == field_name:
-				if self.sort_order == 1:
-					self.sort_order = 0
-				else:
+				if self.sort_order != 1:
 					# Unsort. clear sorting
 					self.sort_field = None
-					self.sort_order = 0
+				self.sort_order = 0
 			else:
 				self.sort_field = sort_field
 				self.sort_order = 1
@@ -405,12 +401,12 @@ class ListView(TemplateView):
 		await self.refresh(player)
 
 	async def _prev_page(self, player, *args, **kwargs):
-		if self.page - 1 > 0:
+		if self.page > 1:
 			self.page -= 1
 			await self.refresh(player)
 
 	async def _prev_10_pages(self, player, *args, **kwargs):
-		if self.page - 10 > 0:
+		if self.page > 10:
 			self.page -= 10
 		else:
 			self.page = 1
@@ -451,7 +447,7 @@ class ManualListView(ListView):
 	async def apply_filter(self, frame):
 		if not self.search_text:
 			return frame
-		query = list()
+		query = []
 		for field in await self.get_fields():
 			if 'searching' in field and field['searching']:
 				if 'search_strip_styles' in field and field['search_strip_styles']:

@@ -54,12 +54,12 @@ class GbxRemote:
 		self.dedicated_build = None
 
 		self.event_loop = event_pool or asyncio.get_event_loop()
-		self.gbx_methods = list()
+		self.gbx_methods = []
 
-		self.handlers = dict()
+		self.handlers = {}
 		self.handler_nr = 0x80000000
 
-		self.script_handlers = dict()
+		self.script_handlers = {}
 
 		self.reader = None
 		self.writer = None
@@ -247,9 +247,10 @@ class GbxRemote:
 		if handle_nr in self.handlers:
 			await self.handle_response(handle_nr, method, data, fault)
 		elif method and data is not None:
-			if method == 'ManiaPlanet.ModeScriptCallbackArray':
-				await self.handle_scripted(handle_nr, method, data)
-			elif method == 'ManiaPlanet.ModeScriptCallback':
+			if method in [
+			    'ManiaPlanet.ModeScriptCallbackArray',
+			    'ManiaPlanet.ModeScriptCallback',
+			]:
 				await self.handle_scripted(handle_nr, method, data)
 			else:
 				await self.handle_callback(handle_nr, method, data)
@@ -295,7 +296,7 @@ class GbxRemote:
 		# Try to parse JSON, mostly the case.
 		try:
 			if isinstance(raw, list):
-				payload = dict()
+				payload = {}
 				for idx, part in enumerate(raw):
 					try:
 						payload.update(json.loads(part))
@@ -315,12 +316,10 @@ class GbxRemote:
 				handler = self.script_handlers.pop(response_id)
 				handler.set_result(payload)
 				handler.done()
-				return
 			else:
 				# We don't have this handler registered, throw warning in console.
 				logger.warning('GBX: Received scripted response with responseid, but no hander was registered! Payload: {}'.format(payload))
-				return
-
+			return
 		# If not, we should just throw it as an ordinary callback.
 		logger.debug('GBX: Received scripted callback: {}: {}'.format(method, payload))
 

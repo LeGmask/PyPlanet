@@ -98,9 +98,7 @@ def style_strip(text, *strip_methods, strip_styling_blocks=True, keep_reset=Fals
 
 	if not regex:
 		regex = r'(\$[{letters}]{parts})+'.format(
-			letters=letters,
-			parts='|{}'.format('|'.join(parts)) if len(parts) > 0 else ''
-		)
+		    letters=letters, parts='|{}'.format('|'.join(parts)) if parts else '')
 
 	# Strip and return.
 	return re.sub(regex, '', text, flags=re.IGNORECASE)

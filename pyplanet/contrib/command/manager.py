@@ -40,7 +40,7 @@ class CommandManager(CoreContrib):
 		"""
 		self._instance = instance
 
-		self._commands = list()
+		self._commands = []
 
 	async def on_start(self, **kwargs):
 		# Register events.

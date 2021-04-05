@@ -94,13 +94,9 @@ class CpTimesListView(ManualListView):
 		self.provide_search = False
 
 	async def get_data(self):
-		items = []
 		list_times = self.app.best_cp_times
-		for pcp in list_times:
-			items.append({
+		return [{
 				'index': pcp.cp,
 				'player_nickname': pcp.player.nickname,
 				'record_time': times.format_time(pcp.time)
-			})
-
-		return items
+			} for pcp in list_times]

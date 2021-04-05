@@ -456,42 +456,44 @@ class MxStatusListView(ManualListView):
 
 	async def action_update_map(self, player, values, instance, **kwargs):
 		# Check if the map could be updated.
-		if instance['action_update'] is True:
-			# Ask for confirmation.
-			cancel = bool(
-				await ask_confirmation(player, 'Are you sure you want to update map \'{}\'$z$s to the version from {}?'.format(
-					instance['map_name'],
-					self.app.site_short_name
-				), size='sm')
-			)
-			if cancel is True:
-				return
+		if instance['action_update'] is not True:
+			return
 
-			folders = None
-			if 'jukebox' in self.app.instance.apps.apps:
-				# Check if the map was part of a map folder.
-				# Remove the current version and add the new version to the folders.
-				folders = await self.app.instance.apps.apps['jukebox'].folder_manager.get_folders_containing_map(instance['map_id'])
-				if folders is not None and len(folders) != 0:
-					for folder in folders:
-						await self.app.instance.apps.apps['jukebox'].folder_manager.remove_map_from_folder(folder.id, instance['map_id'])
+		# Ask for confirmation.
+		cancel = bool(
+			await ask_confirmation(player, 'Are you sure you want to update map \'{}\'$z$s to the version from {}?'.format(
+				instance['map_name'],
+				self.app.site_short_name
+			), size='sm')
+		)
+		if cancel:
+			return
 
-			# Remove the current version from the server.
-			mock_remove = namedtuple("data", ["nr"])
-			await self.app.instance.apps.apps['admin'].map.remove_map(player, mock_remove(nr=instance['map_id']))
+		folders = None
+		if 'jukebox' in self.app.instance.apps.apps:
+			# Check if the map was part of a map folder.
+			# Remove the current version and add the new version to the folders.
+			folders = await self.app.instance.apps.apps['jukebox'].folder_manager.get_folders_containing_map(instance['map_id'])
+			if folders is not None and len(folders) != 0:
+				for folder in folders:
+					await self.app.instance.apps.apps['jukebox'].folder_manager.remove_map_from_folder(folder.id, instance['map_id'])
 
-			# Add the new version from MX.
-			mock_add = namedtuple("data", ["maps"])
-			added_map = await self.app.add_mx_map(player, mock_add(maps=[instance['index']]))
+		# Remove the current version from the server.
+		mock_remove = namedtuple("data", ["nr"])
+		await self.app.instance.apps.apps['admin'].map.remove_map(player, mock_remove(nr=instance['map_id']))
+
+		# Add the new version from MX.
+		mock_add = namedtuple("data", ["maps"])
+		added_map = await self.app.add_mx_map(player, mock_add(maps=[instance['index']]))
 
 			# If the map could be added and was part of folders, update the folders to contain the new version.
-			if added_map is not None and len(added_map) == 1:
-				if folders is not None and len(folders) != 0:
-					for folder in folders:
-						await self.app.instance.apps.apps['jukebox'].folder_manager.add_map_to_folder(folder.id, added_map[0].id)
+		if (added_map is not None and len(added_map) == 1 and folders is not None
+		    and len(folders) != 0):
+			for folder in folders:
+				await self.app.instance.apps.apps['jukebox'].folder_manager.add_map_to_folder(folder.id, added_map[0].id)
 
-			# Update the current view.
-			await self.refresh(player=player)
+		# Update the current view.
+		await self.refresh(player=player)
 
 	async def get_data(self):
 		if self.cache:

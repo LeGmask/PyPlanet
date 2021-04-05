@@ -86,11 +86,11 @@ class GbxClient(GbxRemote):
 
 		# Current stack holds the current multicall,
 		# will be rotated once the multicall reaches the maximum request size.
-		current_stack = list()
+		current_stack = []
 
 		# We will stack calls into multicalls. Structure of this list:
 		# multicalls = list(   list()   ) = The list contains lists with calls.
-		multicalls = list()
+		multicalls = []
 
 		# Create the multicall(s)
 		for query in queries:
@@ -104,21 +104,24 @@ class GbxClient(GbxRemote):
 			else:
 				multicalls.append(current_stack)
 				current_length = 0
-				current_stack = list()
+				current_stack = []
 
 		# Append the last stack.
-		if len(current_stack) > 0:
+		if current_stack:
 			multicalls.append(current_stack)
 
 		# Create multicall queries.
-		calls = list()
-		for mc in multicalls:
-			calls.append(
-				self.execute('system.multicall', [{'methodName': c.method, 'params': c.args} for c in mc])
-			)
-
+		calls = [
+		    self.execute(
+		        'system.multicall',
+		        [{
+		            'methodName': c.method,
+		            'params': c.args
+		        } for c in mc],
+		    ) for mc in multicalls
+		]
 		multi_results = await asyncio.gather(*calls)
-		results = list()
+		results = []
 		for res in multi_results:
 			if isinstance(res, list) and len(res) > 0 and isinstance(res[0], list):
 				# When we have a list inside our list, we will unwrap that to our root results. This is mostly the case,

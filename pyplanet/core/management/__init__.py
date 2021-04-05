@@ -101,10 +101,9 @@ class ManagementUtility:
 			sys.exit(1)
 		if isinstance(app_name, BaseCommand):
 			# If the command is already loaded, use it directly.
-			klass = app_name
+			return app_name
 		else:
-			klass = load_command_class(app_name, subcommand)
-		return klass
+			return load_command_class(app_name, subcommand)
 
 	def execute(self):
 		try:
@@ -173,10 +172,7 @@ class ManagementUtility:
 
 			commands_dict = defaultdict(lambda: [])
 			for name, app in get_commands().items():
-				if app == 'pyplanet.core':
-					app = 'pyplanet'
-				else:
-					app = app.rpartition('.')[-1]
+				app = 'pyplanet' if app == 'pyplanet.core' else app.rpartition('.')[-1]
 				commands_dict[app].append(name)
 
 			style = color_style()

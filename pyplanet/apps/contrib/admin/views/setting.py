@@ -37,7 +37,7 @@ class ModeSettingMenuView(ManualListView):
 		self.child = None
 
 	async def get_data(self):
-		settings = dict()
+		settings = {}
 		mode_info = await self.app.instance.mode_manager.get_current_script_info()
 		mode_settings = await self.app.instance.mode_manager.get_settings()
 		if 'ParamDescs' in mode_info:
@@ -83,11 +83,11 @@ class ModeSettingMenuView(ManualListView):
 		value_type = type(row[field['index']])
 		if row[field['index']] is None:
 			return '-'
-		if value_type == str or value_type == int or value_type == float or value_type == bool:
+		if value_type in [str, int, float, bool]:
 			return str(row[field['index']])
 		elif value_type == dict:
 			return 'Dictionary, edit to show'
-		elif value_type == set or value_type == list:
+		elif value_type in [set, list]:
 			return '{} values, edit to show'.format(len(row[field['index']]))
 		return 'Unknown type {}'.format(str(value_type))
 

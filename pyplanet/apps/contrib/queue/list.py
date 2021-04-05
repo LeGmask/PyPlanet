@@ -14,7 +14,7 @@ class QueueList:
 	"""
 
 	def __init__(self):
-		self.list = list()
+		self.list = []
 		self._lock = asyncio.Lock()
 		self.lock = asyncio.Lock()
 

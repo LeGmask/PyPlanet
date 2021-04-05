@@ -37,23 +37,22 @@ class StatsScoresListView(ManualListView):
 
 		personal_list = [s for s in scores_list if s.player.id == self.player.get_id()]
 
-		if len(personal_list) == 0:
+		if not personal_list:
 			message = '$i$f00There are no personal scores available for $fff{}$z$s$f00$i!'.format(self.app.instance.map_manager.current_map.name)
 			await self.app.instance.chat(message, self.player)
 			return
 
-		local_record = min([s.score for s in scores_list])
+		local_record = min(s.score for s in scores_list)
 
-		scores = list()
+		scores = []
 		last_best = 0
 		last_best_index = 1
-		personal_best = min([s.score for s in personal_list])
+		personal_best = min(s.score for s in personal_list)
 		for score_in_list in personal_list:
-			historical_local = min([s.score for s in scores_list if s.created_at <= score_in_list.created_at])
+			historical_local = min(
+			    s.score for s in scores_list if s.created_at <= score_in_list.created_at)
 
-			score = dict()
-			score['index'] = ''
-			score['score'] = times.format_time(score_in_list.score)
+			score = {'index': '', 'score': times.format_time(score_in_list.score)}
 			score['created_at'] = score_in_list.created_at.strftime('%d-%m-%Y %H:%M:%S')
 			score['difference_to_pb'] = times.format_time((score_in_list.score - personal_best))
 			score['difference_to_prev'] = ''
@@ -202,16 +201,21 @@ class CheckpointComparisonView(ManualListView):
 		local_record = next(iter(scores_list or []), None)
 		personal_best = next(iter(personal_list or []), None)
 
-		checkpoints = list()
+		checkpoints = []
 		total_pb = 0
 		total_local = 0
 		total_ideal = 0
 
-		for checkpoint_index in range(0, self.app.instance.map_manager.current_map.num_checkpoints):
+		for checkpoint_index in range(self.app.instance.map_manager.current_map.num_checkpoints):
 			pb_checkpoint = personal_best.checkpoints[checkpoint_index] if personal_best is not None else None
 			local_checkpoint = local_record.checkpoints[checkpoint_index] if local_record is not None else None
-			ideal_checkpoint = min([cp.checkpoints[checkpoint_index] for cp in scores_list]) if scores_list is not None and len(scores_list) > 0 else None
-			ideal_record = [score for score in scores_list if score.checkpoints[checkpoint_index] == ideal_checkpoint][0] if scores_list is not None and len(scores_list) > 0 else None
+			ideal_checkpoint = (min(
+			    cp.checkpoints[checkpoint_index] for cp in scores_list)
+			                    if scores_list is not None and scores_list else None)
+			ideal_record = ([
+			    score for score in scores_list
+			    if score.checkpoints[checkpoint_index] == ideal_checkpoint
+			][0] if scores_list is not None and scores_list else None)
 
 			if pb_checkpoint is not None:
 				total_pb += pb_checkpoint
@@ -220,9 +224,16 @@ class CheckpointComparisonView(ManualListView):
 				total_local += local_checkpoint
 				total_ideal += ideal_checkpoint
 
-			checkpoint = dict()
-			checkpoint['index'] = (checkpoint_index + 1) if checkpoint_index < (self.app.instance.map_manager.current_map.num_checkpoints - 1) else 'Finish'
-			checkpoint['personal_best'] = '{} ({})'.format(times.format_time(total_pb), times.format_time(pb_checkpoint)) if pb_checkpoint is not None else '-'
+			checkpoint = {
+			    'index':
+			    checkpoint_index + 1 if checkpoint_index <
+			    (self.app.instance.map_manager.current_map.num_checkpoints - 1) else
+			    'Finish',
+			    'personal_best':
+			    '{} ({})'.format(
+			        times.format_time(total_pb), times.format_time(pb_checkpoint))
+			    if pb_checkpoint is not None else '-',
+			}
 			checkpoint['local_record'] = '{} ({})'.format(times.format_time(total_local), times.format_time(local_checkpoint)) if local_checkpoint is not None else '-'
 			checkpoint['local_record_driver'] = local_record.player.nickname if local_checkpoint is not None else '-'
 			checkpoint['difference_to_local'] = '-'

@@ -76,7 +76,7 @@ class Queue(AppConfig):
 			if player.flow.is_spectator:
 				calls.append(self.instance.gbx('ForceSpectator', player.login, 1))
 				logins.append(player.login)
-		if len(calls) > 0:
+		if calls:
 			await asyncio.gather(
 				self.instance.gbx.multicall(*calls),
 				self.widget.display(player_logins=logins)

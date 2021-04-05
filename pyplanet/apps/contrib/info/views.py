@@ -22,7 +22,7 @@ class MapInfoWidget(WidgetView):
 		self.manager = app.context.ui
 		self.id = 'pyplanet__widgets_mapinfo'
 
-		self.mx_link_cache = dict()
+		self.mx_link_cache = {}
 
 	async def get_context_data(self):
 		map = self.app.instance.map_manager.current_map
@@ -44,8 +44,6 @@ class MapInfoWidget(WidgetView):
 					self.mx_link_cache[map.uid] = mx_link
 				except Exception as e:
 					logger.error('Could not retrieve map info from MX/TM API for the info widget: {}'.format(str(e)))
-					pass
-
 		context = await super().get_context_data()
 		context.update({
 			'map_name': map.name,

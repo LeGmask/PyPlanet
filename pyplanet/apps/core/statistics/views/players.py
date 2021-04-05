@@ -25,17 +25,17 @@ class TopActivePlayersView(ManualListView):
 		self.active = active
 
 	async def get_data(self):
-		data = list()
-		for idx, player in enumerate(self.active):
-			data.append(dict(
-				place=idx+1,
-				player_nickname=player.nickname,
-				total_time=format_time(
-					player.total_playtime * 1000, hide_hours_when_zero=False, hide_milliseconds=True
-				),
-			))
-
-		return data
+		return [
+		    dict(
+		        place=idx + 1,
+		        player_nickname=player.nickname,
+		        total_time=format_time(
+		            player.total_playtime * 1000,
+		            hide_hours_when_zero=False,
+		            hide_milliseconds=True,
+		        ),
+		    ) for idx, player in enumerate(self.active)
+		]
 
 	async def destroy(self):
 		self.active = None

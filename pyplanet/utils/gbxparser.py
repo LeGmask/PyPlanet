@@ -26,7 +26,7 @@ class _LookBackUtils:
 
 	def __init__(self, buffer):
 		self.buffer = buffer
-		self.store = list()
+		self.store = []
 		self.version = None
 
 	async def read_string(self):
@@ -64,7 +64,7 @@ class _LookBackUtils:
 
 	def reset(self):
 		if self.version:
-			self.store = list()
+			self.store = []
 			self.version = None
 
 
@@ -108,22 +108,19 @@ class GbxParser:
 			raise Exception('File or buffer is required!')
 		self.file = file
 
-		if buffer:
-			if iscoroutinefunction(buffer.read):
-				self.buffer = buffer
-			else:
-				self.buffer = _AsyncBufferProxy(buffer)
+		if buffer and iscoroutinefunction(buffer.read):
+			self.buffer = buffer
 		else:
 			self.buffer = _AsyncBufferProxy(buffer)
 		self.strings = _LookBackUtils(self.buffer)
 
-		self.result = dict()
+		self.result = {}
 
 		self.header = None
 		self.header_xml = None
 		self.header_length = 0
 		self.header_chunk_count = 0
-		self.header_chunks = dict()
+		self.header_chunks = {}
 
 		self.parse_thumb = False
 		self.parse_header_xml = False
@@ -165,11 +162,11 @@ class GbxParser:
 		self.header_length, = struct.unpack('<I', await self.buffer.read(4))
 		self.header_chunk_count, = struct.unpack('<I', await self.buffer.read(4))
 
-		self.header_chunks = dict()
-		self.header = dict()
+		self.header_chunks = {}
+		self.header = {}
 
 		# Save header data from binary.
-		for nr in range(self.header_chunk_count):
+		for _ in range(self.header_chunk_count):
 			chunk_id, = struct.unpack('<I', await self.buffer.read(4))
 			chunk_size, = struct.unpack('<I', await self.buffer.read(4))
 			self.header_chunks[chunk_id] = chunk_size & ~0x80000000
@@ -187,7 +184,7 @@ class GbxParser:
 			await self.seek(4)
 			time_bronze, time_silver, time_gold, time_author = struct.unpack('<LLLL', await self.buffer.read(16))
 			price, is_multilap, map_type = struct.unpack('<LLL', await self.buffer.read(12))
-			is_multilap = True if is_multilap == 1 else False
+			is_multilap = is_multilap == 1
 			await self.seek(4)
 			author_score, editor = struct.unpack('<LL', await self.buffer.read(8))
 			editor = 'simple' if editor == 1 else 'advanced'

@@ -10,7 +10,6 @@ class LiveReload(FileSystemEventHandler):
 		self.pool = pool
 
 	def on_any_event(self, event):
-		if isinstance(event, FileModifiedEvent):
-			if event.src_path.endswith('.py'):
-				self.pool.restart()
+		if isinstance(event, FileModifiedEvent) and event.src_path.endswith('.py'):
+			self.pool.restart()
 

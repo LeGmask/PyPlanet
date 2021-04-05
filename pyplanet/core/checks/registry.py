@@ -18,7 +18,7 @@ class CheckRegistry:
 		return inner
 
 	def run_checks(self, app_configs=None, tags=None, include_deployment_checks=False, instance=None):
-		errors = list()
+		errors = []
 		checks = self.get_checks(include_deployment_checks)
 
 		try:

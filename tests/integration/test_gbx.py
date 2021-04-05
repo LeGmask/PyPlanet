@@ -33,7 +33,7 @@ class TestGbx(asynctest.TestCase):
 		assert instance.game.server_data_dir is not None
 		assert instance.game.server_map_dir is not None
 		assert instance.game.server_skin_dir is not None
-		assert instance.game.game == 'tm' or instance.game.game == 'sm'
+		assert instance.game.game in ['tm', 'sm']
 
 		await instance.gbx.disconnect()
 		del instance

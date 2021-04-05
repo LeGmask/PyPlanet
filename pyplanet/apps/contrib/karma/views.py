@@ -41,11 +41,11 @@ class KarmaWidget(WidgetView):
 
 	async def get_player_data(self):
 		data = await super().get_player_data()
-		votes = dict()
+		votes = {}
 
 		for player in self.app.instance.player_manager.online:
 			player_vote = [x for x in self.app.current_votes if x.player_id == player.get_id()]
-			if len(player_vote) > 0:
+			if player_vote:
 				if player_vote[0].expanded_score is not None:
 					votes[player.login] = {'player_vote': player_vote[0].expanded_score}
 				else:

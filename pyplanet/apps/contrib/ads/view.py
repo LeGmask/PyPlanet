@@ -37,10 +37,9 @@ class PayPalLogoView(TemplateView):
 	async def get_context_data(self):
 		if await self.app.setting_enable_discord.get_value():
 			self.widget_x = 131
-			self.widget_y = -50
 		else:
 			self.widget_x = 139
-			self.widget_y = -50
+		self.widget_y = -50
 		context = await super().get_context_data()
 		context.update({
 			'donation_url': self.app.paypal_donation_url,

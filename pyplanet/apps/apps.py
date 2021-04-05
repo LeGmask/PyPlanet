@@ -50,8 +50,8 @@ class Apps:
 		if self.ready:
 			return
 
-		populated_apps = dict()
-		dep_dict = dict()
+		populated_apps = {}
+		dep_dict = {}
 
 		# Load modules.
 		for entry in apps:
@@ -69,8 +69,8 @@ class Apps:
 
 			# Get dependencies to other apps.
 			deps = getattr(app, 'app_dependencies', list())
-			if not type(deps) is list:
-				deps = list()
+			if type(deps) is not list:
+				deps = []
 
 			# Add to the list so it can get ordered by dependencies. (not if in_order is true).
 			if in_order:
@@ -92,9 +92,7 @@ class Apps:
 			try:
 				self.apps[label] = populated_apps[label]
 			except KeyError:
-				if label.startswith('core.'):
-					pass
-				else:
+				if not label.startswith('core.'):
 					raise Exception('One of the apps depends on a non existing app: {}'.format(label))
 
 	async def check(self, on_start=False):

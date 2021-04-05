@@ -90,7 +90,7 @@ class MX(AppConfig):  # pragma: no cover
 		try:
 			map_info = await self.api.map_info(self.instance.map_manager.current_map.uid)
 		except Exception as e:
-			map_info = list()
+			map_info = []
 			logger.error('Could not retrieve map info from MX/TM API: {}'.format(str(e)))
 		if len(map_info) != 1:
 			message = '$f00Map could not be found on MX!'
@@ -150,10 +150,7 @@ class MX(AppConfig):  # pragma: no cover
 			pack_id = data.pack[0]
 			token = data.pack[1] if len(data.pack) == 2 else ""
 			ids = await self.api.get_pack_ids(pack_id, token)
-			mx_ids = list()
-			for obj in ids:
-				mx_ids.append(str(obj[0]))
-
+			mx_ids = [str(obj[0]) for obj in ids]
 			mock = namedtuple("data", ["maps"])
 
 			await self.instance.chat('$ff0{}: Installing mappack... This can take a while.'.format(self.site_short_name), player)
@@ -197,7 +194,7 @@ class MX(AppConfig):  # pragma: no cover
 		juke_maps = await juke_after_adding.get_value()
 		if 'jukebox' not in self.instance.apps.apps:
 			juke_maps = False
-		added_map_uids = list()
+		added_map_uids = []
 
 		for mx_id, mx_info in infos:
 			if 'Name' not in mx_info:
@@ -220,15 +217,14 @@ class MX(AppConfig):  # pragma: no cover
 				# Insert map to server.
 				result = await self.instance.map_manager.add_map(map_filename, save_matchsettings=False)
 
-				if result:
-					added_map_uids.append(mx_info['MapUID'])
-
-					message = '$ff0Admin $fff{}$z$s$ff0 has added{} the map $fff{}$z$s$ff0 by $fff{}$z$s$ff0 from {}..'.format(
-						player.nickname, ' and juked' if juke_maps else '', mx_info['Name'], mx_info['Username'], self.site_short_name
-					)
-					await self.instance.chat(message)
-				else:
+				if not result:
 					raise Exception('Unknown error while adding the map!')
+				added_map_uids.append(mx_info['MapUID'])
+
+				message = '$ff0Admin $fff{}$z$s$ff0 has added{} the map $fff{}$z$s$ff0 by $fff{}$z$s$ff0 from {}..'.format(
+					player.nickname, ' and juked' if juke_maps else '', mx_info['Name'], mx_info['Username'], self.site_short_name
+				)
+				await self.instance.chat(message)
 			except Exception as e:
 				logger.warning('Error when player {} was adding map from {}: {}'.format(player.login, self.site_short_name, str(e)))
 				message = '$ff0Error: Can\'t add map {}, Error: {}'.format(mx_info['Name'], str(e))
@@ -247,7 +243,7 @@ class MX(AppConfig):  # pragma: no cover
 			pass
 
 		# Jukebox all the maps requested, in order.
-		if juke_maps and len(added_map_uids) > 0:
+		if juke_maps and added_map_uids:
 			# Fetch map objects.
 			for juke_uid in added_map_uids:
 				map_instance = await self.instance.map_manager.get_map(uid=juke_uid)

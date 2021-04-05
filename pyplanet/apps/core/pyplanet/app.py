@@ -225,7 +225,7 @@ class PyPlanetConfig(AppConfig):
 		commands = await self.instance.command_manager.help_entries(player, command.admin)
 
 		# Prepare and send the calls.
-		calls = list()
+		calls = []
 		for cmds in batch(commands, 7):
 			help_texts = [str(c) for c in cmds]
 			calls.append(

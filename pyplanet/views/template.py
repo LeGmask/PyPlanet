@@ -60,10 +60,9 @@ class TemplateView(View):
 		"""
 		Get global and local context data, used to render template.
 		"""
-		context = dict(
+		return dict(
 			id=self.id,
 		)
-		return context
 
 	@deprecated
 	async def get_player_data(self):

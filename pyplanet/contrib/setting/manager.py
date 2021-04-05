@@ -15,7 +15,7 @@ class _BaseSettingManager:
 		:type instance: pyplanet.core.instance.Instance
 		"""
 		self._instance = instance
-		self._settings = list()
+		self._settings = []
 		self._app = None
 
 	async def register(self, *settings):
@@ -46,7 +46,7 @@ class GlobalSettingManager(_BaseSettingManager, CoreContrib):
 
 	def __init__(self, instance):
 		super().__init__(instance)
-		self.app_managers = dict()
+		self.app_managers = {}
 
 	async def on_start(self):
 		# Register core global settings.
@@ -82,11 +82,9 @@ class GlobalSettingManager(_BaseSettingManager, CoreContrib):
 		"""
 		Retrieve all settings, of all submanagers.
 		"""
-		for setting in self._settings:
-			yield setting
+		yield from self._settings
 		for app, manager in self.app_managers.items():
-			for setting in manager._settings:
-				yield setting
+			yield from manager._settings
 
 	async def get_setting(self, app_label, key, prefetch_values=True):
 		"""
@@ -98,20 +96,20 @@ class GlobalSettingManager(_BaseSettingManager, CoreContrib):
 		:return: Setting instance.
 		:raise: SettingException
 		"""
-		if app_label is None:
-			setting = None
-			for s in self._settings:
-				if s.key == key:
-					setting = s
-					break
+		if app_label is not None:
+			return await self.get_app_manager(app_label).get_setting(key, prefetch_values)
+		setting = None
+		for s in self._settings:
+			if s.key == key:
+				setting = s
+				break
 
-			if not setting:
-				raise SettingException('Setting with key not found')
+		if not setting:
+			raise SettingException('Setting with key not found')
 
-			if prefetch_values and setting._value[0] is False:
-				await setting.get_value()
-			return setting
-		return await self.get_app_manager(app_label).get_setting(key, prefetch_values)
+		if prefetch_values and setting._value[0] is False:
+			await setting.get_value()
+		return setting
 
 	async def get_apps(self, prefetch_values=True):
 		"""
@@ -121,7 +119,7 @@ class GlobalSettingManager(_BaseSettingManager, CoreContrib):
 		:param prefetch_values: Prefetch the values in this call. Defaults to True.
 		:return: List with setting objects.
 		"""
-		apps = dict()
+		apps = {}
 		if prefetch_values:
 			await asyncio.gather(*[
 				s.get_value(refresh=True) for s in self.recursive_settings
@@ -147,7 +145,7 @@ class GlobalSettingManager(_BaseSettingManager, CoreContrib):
 		:param prefetch_values: Prefetch the values in this call. Defaults to True.
 		:return: List with setting objects.
 		"""
-		cats = dict()
+		cats = {}
 		if prefetch_values:
 			await asyncio.gather(*[
 				s.get_value(refresh=True) for s in self.recursive_settings
@@ -259,7 +257,7 @@ class AppSettingManager(_BaseSettingManager):
 		Get all the categories we have registered.
 		Returns a dict with label as key, and count + name as values.
 		"""
-		cats = dict()
+		cats = {}
 		for setting in self._settings:
 			if setting.category not in cats:
 				cats[setting.category] = dict(count=0)

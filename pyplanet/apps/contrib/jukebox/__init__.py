@@ -87,7 +87,7 @@ class Jukebox(AppConfig):
 			await self.display_chat_commands(player)
 		else:
 			async with self.lock:
-				if data.option == 'list' or data.option == 'display':
+				if data.option in ['list', 'display']:
 					if len(self.jukebox) > 0:
 						view = JukeboxListView(self)
 						await view.display(player=player.login)
@@ -155,7 +155,7 @@ class Jukebox(AppConfig):
 				await self.instance.chat(message, player)
 				return
 
-			if not any(item['map'] == map for item in self.jukebox):
+			if all(item['map'] != map for item in self.jukebox):
 				self.jukebox.append({'player': player, 'map': map})
 				message = '$fff{}$z$s$fa0 was added to the jukebox by $fff{}$z$s$fa0.'.format(map.name, player.nickname)
 				await self.instance.chat(message)
@@ -189,15 +189,16 @@ class Jukebox(AppConfig):
 			)
 		except Fault as e:
 			# It's removed from the server.
-			if 'Map not in the selection' in e.faultString or 'Map unknown' in e.faultString:
-				await self.instance.chat(
-					'$fa0Setting the next map has been canceled because the map is not on the server anymore!'
-				)
-
-				# Retry the next map(s).
-				await self.podium_start()
-			else:
+			if ('Map not in the selection' not in e.faultString
+			    and 'Map unknown' not in e.faultString):
 				raise
+
+			await self.instance.chat(
+				'$fa0Setting the next map has been canceled because the map is not on the server anymore!'
+			)
+
+			# Retry the next map(s).
+			await self.podium_start()
 
 	async def add_to_folder(self, player, values, map_dictionary, view, **kwargs):
 		view = AddToFolderView(self, player, map_dictionary['id'], self.folder_manager)

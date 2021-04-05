@@ -251,7 +251,6 @@ class Voting(AppConfig):
 
 		if len(vote.votes_current) >= vote.votes_required:
 			message = '$fff{}$z$s$0cf voted to $fff{}$0cf.'.format(player.nickname, vote.action)
-			await self.instance.chat(message)
 		else:
 			required_votes = (vote.votes_required - len(vote.votes_current))
 			message = '$fff{}$z$s$0cf voted to $fff{}$0cf, $fff{}$0cf more {} needed (use $fffF5$0cf to vote){}.'.format(
@@ -259,7 +258,8 @@ class Voting(AppConfig):
 				(' ($fff{}$0cf seconds left)'.format(int(round((
 																	   self.current_vote.time_limit - datetime.datetime.now()).total_seconds()))) if self.current_vote.time_limit is not None else '')
 			)
-			await self.instance.chat(message)
+
+		await self.instance.chat(message)
 
 	async def vote_removed(self, vote, player):
 		"""
@@ -687,8 +687,7 @@ class Voting(AppConfig):
 		new_vote.requester = player
 		new_vote.votes_current = []
 		needed_votes = round(players * ratio)
-		if needed_votes > players:
-			needed_votes = players
+		needed_votes = min(needed_votes, players)
 		new_vote.votes_required = needed_votes
 		new_vote.vote_added = self.vote_added
 		new_vote.vote_removed = self.vote_removed

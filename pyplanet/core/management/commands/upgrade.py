@@ -41,7 +41,7 @@ class Command(BaseCommand):  # pragma: no cover
 		user = input('Are you sure you want to upgrade PyPlanet to version: \'{}\'? [y/N]: '.format(
 			version or 'latest'
 		))
-		if not user or not (user.lower() == 'y' or user.lower() == 'yes'):
+		if not user or not user.lower() in ['y', 'yes']:
 			print('Cancelled!')
 			return
 

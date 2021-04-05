@@ -84,7 +84,7 @@ class MXApi:
 		if response.status < 200 or response.status > 399:
 			raise MXInvalidResponse('Got invalid response status from ManiaExchange: {}'.format(response.status))
 
-		maps = list()
+		maps = []
 		json = await response.json()
 		for info in json['results']:
 			# Parse some differences between the api game endpoints.
@@ -125,16 +125,14 @@ class MXApi:
 	async def map_info(self, *ids):
 		if not len(ids):
 			return list()
-		if isinstance(ids, str) or isinstance(ids, int):
+		if isinstance(ids, (str, int)):
 			# In case just one value is being passed, put it into an array.
 			ids = [ids]
 
 		# Split the map identifiers into groups, as the ManiaExchange API only accepts a limited amount of maps in one request.
 		split_map_ids = [ids[i * self.map_info_page_size:(i + 1) * self.map_info_page_size] for i in range((len(ids) + self.map_info_page_size - 1) // self.map_info_page_size)]
-		split_results = list()
-		coros = list()
-		for split_ids in split_map_ids:
-			coros.append(self.map_info_page(split_ids))
+		split_results = []
+		coros = [self.map_info_page(split_ids) for split_ids in split_map_ids]
 		split_results = await asyncio.gather(*coros)
 
 		# Join the multiple result lists back into one list.
@@ -151,10 +149,7 @@ class MXApi:
 			raise MXInvalidResponse('Map author has declined info for the map. Status code: {}'.format(response.status))
 		if response.status < 200 or response.status > 399:
 			raise MXInvalidResponse('Got invalid response status from ManiaExchange: {}'.format(response.status))
-		record = list()
-		for info in await response.json():
-			record.append((info))
-		return record
+		return [info for info in await response.json()]
 	
 	async def map_offline_records(self, trackid):
 		url = '{base}/replays/get_replays/{id}/10'.format(base=self.base_url(True), id=trackid)
@@ -165,7 +160,7 @@ class MXApi:
 			raise MXInvalidResponse('Map author has declined info for the map. Status code: {}'.format(response.status))
 		if response.status < 200 or response.status > 399:
 			raise MXInvalidResponse('Got invalid response status from ManiaExchange: {}'.format(response.status))
-		record = list()
+		record = []
 		for info in await response.json():
 			print(info)
 			record.append((info))
@@ -177,7 +172,7 @@ class MXApi:
 			base=self.base_url(True),
 			ids=','.join(str(i) for i in ids[0])
 			)
-			
+
 		else:
 			url = '{base}/maps/{ids}'.format(
 				base=self.base_url(True),
@@ -192,7 +187,7 @@ class MXApi:
 			raise MXInvalidResponse('Map author has declined info for the map. Status code: {}'.format(response.status))
 		if response.status < 200 or response.status > 399:
 			raise MXInvalidResponse('Got invalid response status from ManiaExchange: {}'.format(response.status))
-		maps = list()
+		maps = []
 		for info in await response.json():
 			# Parse some differences between the api game endpoints.
 			mx_id = info['TrackID'] if 'TrackID' in info else info['MapID']
@@ -230,16 +225,16 @@ class MXApi:
 			raise MXMapNotFound('Map pack not found!')
 		if response.status < 200 or response.status > 399:
 			raise MXInvalidResponse('Got invalid response status from ManiaExchange: {}'.format(response.status))
-		maps = list()
-		if response.content_length > 0:
-			for info in await response.json():
-				# Parse some differences between the api game endpoints.
-				mx_id = info['TrackID']
-				maps.append((mx_id, info))
-
-			return maps
-		else:
+		if response.content_length <= 0:
 			raise MXMapNotFound("Mx returned with empty response.")
+
+		maps = []
+		for info in await response.json():
+			# Parse some differences between the api game endpoints.
+			mx_id = info['TrackID']
+			maps.append((mx_id, info))
+
+		return maps
 
 	async def download(self, mx_id):
 		url = '{base}/maps/download/{id}'.format(

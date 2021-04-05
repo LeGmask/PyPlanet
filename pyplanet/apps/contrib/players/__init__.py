@@ -46,10 +46,9 @@ class Players(AppConfig):
 			laston_player = await self.instance.player_manager.get_player(data.login, None, False)
 			if laston_player.last_seen is not None:
 				message = '$ff0Player $fff{}$z$s$ff0 was last online on $fff{}$ff0 at $fff{}$ff0.'.format(laston_player.nickname, laston_player.last_seen.strftime('%d-%m-%Y'), laston_player.last_seen.strftime('%H:%M:%S'))
-				await self.instance.chat(message, player)
 			else:
 				message = '$ff0Player $fff{}$z$s$ff0 has not been seen online (yet).'.format(laston_player.nickname)
-				await self.instance.chat(message, player)
+			await self.instance.chat(message, player)
 		except PlayerNotFound:
 			message = '$i$f00Unknown login!'
 			await self.instance.chat(message, player)

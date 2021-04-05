@@ -32,7 +32,7 @@ class CallMenuView(ManualListView):
 		self.child = None
 
 		self.type = type
-		self.cache = list()
+		self.cache = []
 
 	async def get_buttons(self):
 		return list()
@@ -233,13 +233,14 @@ class CallActionView(TemplateView):
 		if self.method['output'] == 'array':
 			return '\n'.join(raw_output)
 		elif self.method['output'] == 'struct':
-			return '\n'.join(['\'{}\': \'{}\''.format(key, value) for key, value in raw_output.items()])
+			return '\n'.join(
+			    '\'{}\': \'{}\''.format(key, value) for key, value in raw_output.items())
 		return raw_output
 
 	async def execute(self, player, action, values, *_, **__):
 		self.method['last_input'] = values['call_value_field']
 		input_values = str(values['call_value_field']).splitlines()
-		args = list()
+		args = []
 
 		if len(self.method['inputs']) > 0:
 			for idx, input in enumerate(self.method['inputs']):

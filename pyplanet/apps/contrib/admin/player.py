@@ -99,7 +99,7 @@ class PlayerAdmin:
 	async def force_spec(self, player, data, **kwargs):
 		try:
 			dest_player = [p for p in self.instance.player_manager.online if p.login == data.login]
-			if not len(dest_player) == 1:
+			if len(dest_player) != 1:
 				raise Exception()
 			message = '$ff0Admin $fff{}$z$s$ff0 has forced $fff{}$z$s$ff0 into spectator.'.format(
 				player.nickname, dest_player[0].nickname
@@ -115,7 +115,7 @@ class PlayerAdmin:
 	async def force_play(self, player, data, **kwargs):
 		try:
 			dest_player = [p for p in self.instance.player_manager.online if p.login == data.login]
-			if not len(dest_player) == 1:
+			if len(dest_player) != 1:
 				raise Exception()
 			message = '$ff0Admin $fff{}$z$s$ff0 has forced $fff{}$z$s$ff0 into player slot.'.format(
 				player.nickname, dest_player[0].nickname
@@ -134,17 +134,17 @@ class PlayerAdmin:
 
 	async def force_team(self, player, data, **kwargs):
 		dest_player = [p for p in self.instance.player_manager.online if p.login == data.login]
-		if not len(dest_player) == 1:
+		if len(dest_player) != 1:
 			message = '$i$f00Unknown login!'
 			await self.instance.chat(message, player)
 			return
 
 		new_team = None
 		team_name = ''
-		if data.team == 'blue' or data.team == '0':
+		if data.team in ['blue', '0']:
 			new_team = 0
 			team_name = '$00fBLUE'
-		elif data.team == 'red' or data.team == '1':
+		elif data.team in ['red', '1']:
 			new_team = 1
 			team_name = '$f00RED'
 
@@ -163,20 +163,20 @@ class PlayerAdmin:
 
 	async def switch_team(self, player, data, **kwargs):
 		dest_player = [p for p in self.instance.player_manager.online if p.login == data.login]
-		if not len(dest_player) == 1:
+		if len(dest_player) != 1:
 			message = '$i$f00Unknown login!'
 			await self.instance.chat(message, player)
 			return
 
 		new_team = None
 		team_name = ''
-		if dest_player[0].flow.team_id == 1:
-			new_team = 0
-			team_name = '$00fBLUE'
-		elif dest_player[0].flow.team_id == 0:
+		if dest_player[0].flow.team_id == 0:
 			new_team = 1
 			team_name = '$f00RED'
 
+		elif dest_player[0].flow.team_id == 1:
+			new_team = 0
+			team_name = '$00fBLUE'
 		if new_team is None:
 			message = '$i$f00Unable to switch team (are you in a team mode?)!'
 			await self.instance.chat(message, player)

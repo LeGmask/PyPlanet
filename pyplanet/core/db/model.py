@@ -37,12 +37,12 @@ class ObjectManager(Manager):
 		query = getattr(instance, related_name)
 		instances = await self.execute(query)
 
-		if single_backref:
-			for instance in instances:
-				return instance
-			raise query.model_class.DoesNotExist
-		else:
+		if not single_backref:
 			return instances
+
+		for instance in instances:
+			return instance
+		raise query.model_class.DoesNotExist
 
 
 class Model(PeeweeModel):

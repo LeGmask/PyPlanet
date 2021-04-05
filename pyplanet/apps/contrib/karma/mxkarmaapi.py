@@ -54,7 +54,7 @@ class MXKarmaApi:
 		"""
 		if self.session is None:
 			await self.create_session()
-		elif self.session is not None and self.key is None:
+		elif self.key is None:
 			logger.debug('Starting MX Karma session ...')
 
 			url = '{url}/startSession?serverLogin={login}&applicationIdentifier={app}&testMode=false'.format(

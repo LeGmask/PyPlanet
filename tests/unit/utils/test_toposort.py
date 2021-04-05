@@ -24,4 +24,4 @@ def test_toposort():
 		if 'graph is cyclical through' in str(e):
 			cyclical = True
 
-	assert cyclical is True
+	assert cyclical

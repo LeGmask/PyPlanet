@@ -15,7 +15,7 @@ class YamlConfigBackend(FileConfigBackend):
 		super().load()
 
 		# Load the files and parse Yaml.
-		parsed_settings = dict()
+		parsed_settings = {}
 
 		try:
 			for file_name in self.files:

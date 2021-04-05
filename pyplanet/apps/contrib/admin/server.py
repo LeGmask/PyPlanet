@@ -75,18 +75,17 @@ class ServerAdmin:
 		))
 
 	async def on_chat(self, player, text, cmd, **kwargs):
-		if not cmd and self.chat_redirection:
-			if player.level > 0:
-				asyncio.ensure_future(self.instance.chat(
-					'$z[{}$z$s] {}'.format(player.nickname, text), raw=True
-				))
+		if not cmd and self.chat_redirection and player.level > 0:
+			asyncio.ensure_future(self.instance.chat(
+				'$z[{}$z$s] {}'.format(player.nickname, text), raw=True
+			))
 
 	async def set_mode(self, player, data, **kwargs):
 		mode = (' '.join(data.mode))
 		lower_mode = mode.lower()
 		if self.instance.game.game == 'tm':
-		
-			if lower_mode == 'ta' or lower_mode == 'timeattack':
+
+			if lower_mode in ['ta', 'timeattack']:
 				mode = 'TimeAttack.Script.txt'
 			elif lower_mode == 'laps':
 				mode = 'Laps.Script.txt'
@@ -98,10 +97,10 @@ class ServerAdmin:
 				mode = 'Chase.Script.txt'
 			elif lower_mode == 'team':
 				mode = 'Team.Script.txt'
-			
+
 		if self.instance.game.game == 'tmnext':
-		
-			if lower_mode == 'ta' or lower_mode == 'timeattack':
+
+			if lower_mode in ['ta', 'timeattack']:
 				mode = 'Trackmania/TM_TimeAttack_Online.Script.txt'
 			elif lower_mode == 'laps':
 				mode = 'Trackmania/TM_Laps_Online.Script.txt'

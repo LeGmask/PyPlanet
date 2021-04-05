@@ -119,14 +119,13 @@ class StatisticsProcessor:
 
 		now = datetime.now()
 		diff = now - self.topsums_cache_time if self.topsums_cache_time else False
-		if not self.topsums_cache or not diff or diff.total_seconds() > 60:
-			self.topsums_cache = None
-			self.topsums_cache_time = None
-		elif self.topsums_cache:
+		if self.topsums_cache and diff and diff.total_seconds() <= 60:
 			return self.topsums_cache
 
+		self.topsums_cache = None
+		self.topsums_cache_time = None
 		maps = self.app.instance.map_manager.maps
-		players = dict()
+		players = {}
 
 		for map_instance in maps:
 			res = await LocalRecord.objects.execute(

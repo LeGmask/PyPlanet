@@ -93,9 +93,7 @@ class Command:
 			return False
 
 		command = input.pop(0)
-		if self.command == command or command in self.aliases:
-			return True
-		return False
+		return self.command == command or command in self.aliases
 
 	def get_params(self, input):
 		"""
@@ -191,7 +189,7 @@ class Command:
 			is_allowed = await asyncio.gather(*[
 				instance.permission_manager.has_permission(player, perm) for perm in self.perms
 			])
-			if not all(allowed is True for allowed in is_allowed):
+			if any(allowed is not True for allowed in is_allowed):
 				player_has_permission = False
 
 		return player_has_permission
@@ -201,11 +199,8 @@ class Command:
 		"""
 		The usage text line for the command.
 		"""
-		text = 'Usage: /{}{}{}'.format(
-			'/' if self.admin else '',
-			self.namespace if self.namespace else '',
-			self.command
-		)
+		text = 'Usage: /{}{}{}'.format('/' if self.admin else '', self.namespace
+		                               or '', self.command)
 
 		for param in self.parser.params:
 			text += ' {}{}:{}{}'.format(
@@ -221,8 +216,7 @@ class Command:
 	def params_text(self):
 		text = ''
 
-		param_index = 0
-		for param in self.parser.params:
+		for param_index, param in enumerate(self.parser.params):
 			if param_index > 0:
 				text += '\n'
 
@@ -234,8 +228,6 @@ class Command:
 				' = {}'.format(param['help']) if param['help'] else ''
 			)
 
-			param_index += 1
-
 		return text
 
 	@property
@@ -243,14 +235,11 @@ class Command:
 		text = ''
 
 		if self.perms and len(self.perms) > 0:
-			perm_index = 0
-			for permission in self.perms:
+			for perm_index, permission in enumerate(self.perms):
 				if perm_index > 0:
 					text += '\n'
 
 				text += '{}'.format(permission)
-
-				perm_index += 1
 
 		return text
 

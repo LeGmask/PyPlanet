@@ -20,7 +20,7 @@ class ParameterParser:
 		self.prog = prog
 		self.params = list()
 
-		self._errors = list()
+		self._errors = []
 		self.data = object()
 
 	def add_param(
@@ -128,10 +128,10 @@ class ParameterParser:
 		
 		:param argv: arguments.
 		"""
-		values = dict()
+		values = {}
 
 		self.data = None
-		self._errors = list()
+		self._errors = []
 
 		for idx, param in enumerate(self.params):
 			try:

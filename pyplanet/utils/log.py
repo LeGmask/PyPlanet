@@ -99,9 +99,9 @@ def handle_exception(exception=None, module_name=None, func_name=None, extra_dat
 	except:
 		pass
 	try:
-		if not force:
-			if any(ig.lower() in str(exception).lower() for ig in IGNORED_TEXT):
-				ignore = True
+		if not force and any(ig.lower() in str(exception).lower()
+		                     for ig in IGNORED_TEXT):
+			ignore = True
 	except:
 		pass
 
@@ -110,7 +110,7 @@ def handle_exception(exception=None, module_name=None, func_name=None, extra_dat
 
 	# Extra Data.
 	if not extra_data:
-		extra_data = dict()
+		extra_data = {}
 	extra_data = extra_data.copy()
 	if Controller.instance and Controller.instance.game:
 		extra_data.update(dict(game=Controller.instance.game.__dict__))

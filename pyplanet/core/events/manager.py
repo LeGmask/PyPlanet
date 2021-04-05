@@ -27,14 +27,14 @@ class _SignalManager:
 		self.app_managers = dict()
 
 		self.signals = dict()
-		self.callbacks = dict()
+		self.callbacks = {}
 
 		# Reserved signal receivers, this will be filled, and copied to real signals later on.
-		self.reserved = dict()
-		self.reserved_self = dict()
+		self.reserved = {}
+		self.reserved_self = {}
 		#
 
-		self.namespaces = list()
+		self.namespaces = []
 
 		# This var is used to temporary override namespaces when processing apps.
 		self._current_namespace = None
@@ -60,11 +60,7 @@ class _SignalManager:
 			namespace = signal.namespace
 		code = signal.code
 
-		if not hasattr(signal, 'receivers'):
-			instance = signal()
-		else:
-			instance = signal
-
+		instance = signal() if not hasattr(signal, 'receivers') else signal
 		signal_code = '{}:{}'.format(namespace, code)
 
 		if callback:
@@ -86,7 +82,7 @@ class _SignalManager:
 			signal.register(target, **kwargs)
 		except:
 			if signal not in self.reserved:
-				self.reserved[signal] = list()
+				self.reserved[signal] = []
 			self.reserved[signal].append((target, kwargs))
 
 	def get_callback(self, call_name):
@@ -115,7 +111,7 @@ class _SignalManager:
 		else:
 			raise KeyError('No such signal {}!'.format(key))
 
-	def finish_reservations(self):  # pragma: no cover
+	def finish_reservations(self):	# pragma: no cover
 		"""
 		The method will copy all reservations to the actual signals. (PRIVATE)
 		"""
@@ -138,7 +134,7 @@ class _SignalManager:
 					logging.warning(str(e), exc_info=sys.exc_info())
 
 		self.reserved = dict()
-		self.reserved_self = dict()
+		self.reserved_self = {}
 
 	def init_app(self, app):
 		"""
@@ -195,7 +191,7 @@ class AppSignalManager:
 
 		# Hold these to delete when the context is destroyed.
 		self.signals = list()
-		self.listeners = list()
+		self.listeners = []
 
 	def register_signal(self, signal, callback=False):
 		"""
